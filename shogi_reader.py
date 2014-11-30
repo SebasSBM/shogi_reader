@@ -183,7 +183,7 @@ partida = open(file_path, 'r')
 movs = partida.read().splitlines()
 partida.close()
 
-reg = re.compile('^\s*(\d+)-\s(.*)([-|x|\*])(.*)$')
+reg = re.compile('^\s*(\d+)\s*-\s*(\+?[P|L|N|S|G|K|R|B](\d[a-i])?)([-|x|*])(\d[a-i][=|\+]?)$')
 for e in movs:
 	kind = ''
 	action = None
@@ -192,9 +192,9 @@ for e in movs:
 	piece_x = 0
 	piece_y = 0
 	frag = reg.match(e)
-	destiny = [coords_a[frag.group(4)[0]],coords_b[frag.group(4)[1]]]
-	if len(frag.group(4)) > 2:
-		if frag.group(4)[2] == '+':
+	destiny = [coords_a[frag.group(5)[0]],coords_b[frag.group(5)[1]]]
+	if len(frag.group(5)) > 2:
+		if frag.group(5)[2] == '+':
 			promoting = True
 	if (len(frag.group(2)) > 1 and frag.group(2)[0] != '+') or (len(frag.group(2)) > 2 and frag.group(2)[0] == '+'):
 		if frag.group(2)[0] == '+':
@@ -207,11 +207,11 @@ for e in movs:
 			piece_y = coords_b[frag.group(2)[2]]
 	else:
 		kind = frag.group(2)
-	if frag.group(3) == 'x':
+	if frag.group(4) == 'x':
 		action = 1
-	elif frag.group(3) == '*':
+	elif frag.group(4) == '*':
 		action = 2
-	elif frag.group(3) == '-':
+	elif frag.group(4) == '-':
 		action = 0
 
 	if action == 1:
