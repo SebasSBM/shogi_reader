@@ -979,10 +979,9 @@ def move_forward():
 	previous_highlight(pos)
 
 def previous_highlight(cursor):
-	#TODO Current piece must also be highlighted
 	global history, SCREEN
-	if cursor > 0:
-		if history[cursor-1][2] != 2:
+	if history[cursor-1][2] != 2:
+		if cursor > 0:
 			obj = history[cursor-1][0]
 			if history[cursor-1][3] == True:
 				frag = re.match('^lista_(.*\[.*\])$', obj)
@@ -990,7 +989,12 @@ def previous_highlight(cursor):
 			statem = 'coords='+obj
 			exec statem
 			drawcoords = [coords[0]-history[cursor-1][1][0],coords[1]-history[cursor-1][1][1]]
+			pygame.draw.rect(SCREEN, (255,0,0), (drawcoords[0], drawcoords[1], 70, 70))
+			drawcoords = [coords[0],coords[1]]
 			pygame.draw.rect(SCREEN, (0,255,0), (drawcoords[0], drawcoords[1], 70, 70))
+	elif cursor > 0:
+		pygame.draw.rect(SCREEN, (0,255,0), (history[cursor-1][1][0], history[cursor-1][1][1], 70, 70))
+
 			
 	
 def move_back():
