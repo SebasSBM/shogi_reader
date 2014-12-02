@@ -49,30 +49,32 @@ bg = int(r), int(g), int(b)
 
 def redraw():
 	SCREEN.fill(bg)
+	pygame.draw.rect(SCREEN, (82,64,4), (20, 20, 230, 284))
+	pygame.draw.rect(SCREEN, (82,64,4), (930, 375, 230, 284))
 
 	#Verticals
-	pygame.draw.line(SCREEN, (0,0,0), (20,20), (20,659))
-	pygame.draw.line(SCREEN, (0,0,0), (91,20), (91,659))
-	pygame.draw.line(SCREEN, (0,0,0), (162,20), (162,659))
-	pygame.draw.line(SCREEN, (0,0,0), (233,20), (233,659))
-	pygame.draw.line(SCREEN, (0,0,0), (304,20), (304,659))
-	pygame.draw.line(SCREEN, (0,0,0), (375,20), (375,659))
-	pygame.draw.line(SCREEN, (0,0,0), (446,20), (446,659))
-	pygame.draw.line(SCREEN, (0,0,0), (517,20), (517,659))
-	pygame.draw.line(SCREEN, (0,0,0), (588,20), (588,659))
-	pygame.draw.line(SCREEN, (0,0,0), (659,20), (659,659))
+	pygame.draw.line(SCREEN, (0,0,0), (268,20), (268,659))
+	pygame.draw.line(SCREEN, (0,0,0), (339,20), (339,659))
+	pygame.draw.line(SCREEN, (0,0,0), (410,20), (410,659))
+	pygame.draw.line(SCREEN, (0,0,0), (481,20), (481,659))
+	pygame.draw.line(SCREEN, (0,0,0), (552,20), (552,659))
+	pygame.draw.line(SCREEN, (0,0,0), (623,20), (623,659))
+	pygame.draw.line(SCREEN, (0,0,0), (694,20), (694,659))
+	pygame.draw.line(SCREEN, (0,0,0), (765,20), (765,659))
+	pygame.draw.line(SCREEN, (0,0,0), (836,20), (836,659))
+	pygame.draw.line(SCREEN, (0,0,0), (907,20), (907,659))
 
 	#Horizontals
-	pygame.draw.line(SCREEN, (0,0,0), (20,20), (659,20))
-	pygame.draw.line(SCREEN, (0,0,0), (20,91), (659,91))
-	pygame.draw.line(SCREEN, (0,0,0), (20,162), (659,162))
-	pygame.draw.line(SCREEN, (0,0,0), (20,233), (659,233))
-	pygame.draw.line(SCREEN, (0,0,0), (20,304), (659,304))
-	pygame.draw.line(SCREEN, (0,0,0), (20,375), (659,375))
-	pygame.draw.line(SCREEN, (0,0,0), (20,446), (659,446))
-	pygame.draw.line(SCREEN, (0,0,0), (20,517), (659,517))
-	pygame.draw.line(SCREEN, (0,0,0), (20,588), (659,588))
-	pygame.draw.line(SCREEN, (0,0,0), (20,659), (659,659))
+	pygame.draw.line(SCREEN, (0,0,0), (268,20), (907,20))
+	pygame.draw.line(SCREEN, (0,0,0), (268,91), (907,91))
+	pygame.draw.line(SCREEN, (0,0,0), (268,162), (907,162))
+	pygame.draw.line(SCREEN, (0,0,0), (268,233), (907,233))
+	pygame.draw.line(SCREEN, (0,0,0), (268,304), (907,304))
+	pygame.draw.line(SCREEN, (0,0,0), (268,375), (907,375))
+	pygame.draw.line(SCREEN, (0,0,0), (268,446), (907,446))
+	pygame.draw.line(SCREEN, (0,0,0), (268,517), (907,517))
+	pygame.draw.line(SCREEN, (0,0,0), (268,588), (907,588))
+	pygame.draw.line(SCREEN, (0,0,0), (268,659), (907,659))
 redraw()
 
 ### Positions sheet
@@ -87,15 +89,15 @@ redraw()
 
 # *** POSITIONS TABLE ***
 coords_a = {
-	'1': 589,
-	'2': 518,
-	'3': 447,
-	'4': 376,
-	'5': 305,
-	'6': 234,
-	'7': 163,
-	'8': 92,
-	'9': 21
+	'1': 837,
+	'2': 766,
+	'3': 695,
+	'4': 624,
+	'5': 553,
+	'6': 482,
+	'7': 411,
+	'8': 340,
+	'9': 269
 }
 coords_b = {
 	'i': 589,
@@ -110,62 +112,62 @@ coords_b = {
 }
 
 # *** Pieces arrays ***
-lista_pn = {1:[589,447],2:[518,447],3:[447,447],4:[376,447],5:[305,447],6:[234,447],7:[163,447],8:[92,447],9:[21,447]}
+lista_pn = {1:[837,447],2:[766,447],3:[695,447],4:[624,447],5:[553,447],6:[482,447],7:[411,447],8:[340,447],9:[269,447]}
 lista_spn = {}
 cnt_pn = 10
 rpn = 0
-lista_pb = {1:[589,163],2:[518,163],3:[447,163],4:[376,163],5:[305,163],6:[234,163],7:[163,163],8:[92,163],9:[21,163]}
+lista_pb = {1:[837,163],2:[766,163],3:[695,163],4:[624,163],5:[553,163],6:[482,163],7:[411,163],8:[340,163],9:[269,163]}
 lista_spb = {}
 cnt_pb = 10
 rpb = 0
-lista_ln = {1:[21,589],2:[589,589]}
+lista_ln = {1:[269,589],2:[837,589]}
 lista_sln = {}
 cnt_ln = 3
 rln = 0
-lista_lb = {1:[21,21],2:[589,21]}
+lista_lb = {1:[269,21],2:[837,21]}
 lista_slb = {}
 cnt_lb = 3
 rlb = 0
-lista_nn = {1:[92,589],2:[518,589]}
+lista_nn = {1:[340,589],2:[766,589]}
 lista_snn = {}
 cnt_nn = 3
 rnn = 0
-lista_nb = {1:[92,21],2:[518,21]}
+lista_nb = {1:[340,21],2:[766,21]}
 lista_snb = {}
 cnt_nb = 3
 rnb = 0
-lista_sn = {1:[163,589],2:[447,589]}
+lista_sn = {1:[411,589],2:[695,589]}
 lista_ssn = {}
 cnt_sn = 3
 rsn = 0
-lista_sb = {1:[163,21],2:[447,21]}
+lista_sb = {1:[411,21],2:[695,21]}
 lista_ssb = {}
 cnt_sb = 3
 rsb = 0
-lista_gn = {1:[234,589],2:[376,589]}
+lista_gn = {1:[482,589],2:[624,589]}
 cnt_gn = 3
 rgn = 0
-lista_gb = {1:[234,21],2:[376,21]}
+lista_gb = {1:[482,21],2:[624,21]}
 cnt_gb = 3
 rgb = 0
-lista_tn = {1:[518,518]}
+lista_tn = {1:[766,518]}
 lista_stn = {}
 cnt_tn = 2
 rtn = 0
-lista_tb = {1:[92,92]}
+lista_tb = {1:[340,92]}
 lista_stb = {}
 cnt_tb = 2
 rtb = 0
-lista_bn = {1:[92,518]}
+lista_bn = {1:[340,518]}
 lista_sbn = {}
 cnt_bn = 2
 rbn = 0
-lista_bb = {1:[518,92]}
+lista_bb = {1:[766,92]}
 lista_sbb = {}
 cnt_bb = 2
 rbb = 0
-rey_n = [305,589]
-rey_b = [305,21]
+rey_n = [553,589]
+rey_b = [553,21]
 
 # *** Motion log array ***
 history = []
@@ -945,13 +947,13 @@ max_history = len(history)
 
 def move_forward():
 	global pos
+	output = ''
 	if history[pos][2] == 2:
 		#In this case,
 		# history[pos] structure -> [[kind_of_piece,counter_to_assign_id], destiny_coords, action, promoting, piece_respawn]
 		statem = 'lista_'+history[pos][0][0]+'['+(str)(history[pos][0][1])+']=['+(str)(history[pos][1][0])+','+(str)(history[pos][1][1])+']'
 		exec statem
-		statem = 'r'+history[pos][0][0]+'-=1'
-		exec statem
+		output = 'r'+history[pos][0][0]+' -= 1'
 	else:
 		# Standard case,
 		# history[pos] structure -> [code_statement_to_select_piece, coords_sum, action, promoting, piece_respawn]
@@ -971,12 +973,21 @@ def move_forward():
 			exec statem
 	if history[pos][4] != '':#Piece captured that has to be respawn backwards
 		# TODO Avoid regexp abuse
-		frag = re.match('^(lista_.*\[.*\])=\[.*,.*\]$', history[pos][4])
+		frag = re.match('^(lista_(.*)\[.*\])=\[.*,.*\]$', history[pos][4])
 		theobj = frag.group(1)
+		piece = frag.group(2)
+		if len(piece) == 3:
+			piece = piece[1:]
+		if piece[-1] == 'b':
+			piece = piece[:-1]+'n'
+		else:
+			piece = piece[:-1]+'b'
 		statem = 'del '+theobj
 		exec statem
+		output = 'r'+piece+' += 1'
 	pos += 1
 	previous_highlight(pos)
+	return output
 
 def previous_highlight(cursor):
 	global history, SCREEN
@@ -1000,11 +1011,11 @@ def previous_highlight(cursor):
 def move_back():
 	global pos
 	pos -= 1
+	output = ''
 	if history[pos][2] == 2:
 		statem = 'del lista_'+history[pos][0][0]+'['+(str)(history[pos][0][1])+']'
 		exec statem
-		statem = 'r'+history[pos][0][0]+'+=1'
-		exec statem
+		output = 'r'+history[pos][0][0]+' += 1'
 	else:
 		if history[pos][3] == True:
 			#TODO Avoid regexp abuse
@@ -1021,67 +1032,78 @@ def move_back():
 		statem = history[pos][0]+'[1]-='+(str)(history[pos][1][1])
 		exec statem
 	if history[pos][4] != '':
+		frag = re.match('^lista_(.*)\[.*\]=\[.*,.*\]$', history[pos][4])
+		piece = frag.group(1)
+		if len(piece) == 3:
+			piece = piece[1:]
+		if piece[-1] == 'b':
+			piece = piece[:-1]+'n'
+		else:
+			piece = piece[:-1]+'b'
 		exec history[pos][4]
+		output = 'r'+piece+' -= 1'
 	previous_highlight(pos)
+	return output
 
 # TODO Avoid this code duplicate (for instance, enclosing this setup in a function)
 # *** Pieces arrays *** -> restart
-lista_pn = {1:[589,447],2:[518,447],3:[447,447],4:[376,447],5:[305,447],6:[234,447],7:[163,447],8:[92,447],9:[21,447]}
+lista_pn = {1:[837,447],2:[766,447],3:[695,447],4:[624,447],5:[553,447],6:[482,447],7:[411,447],8:[340,447],9:[269,447]}
 lista_spn = {}
 cnt_pn = 10
 rpn = 0
-lista_pb = {1:[589,163],2:[518,163],3:[447,163],4:[376,163],5:[305,163],6:[234,163],7:[163,163],8:[92,163],9:[21,163]}
+lista_pb = {1:[837,163],2:[766,163],3:[695,163],4:[624,163],5:[553,163],6:[482,163],7:[411,163],8:[340,163],9:[269,163]}
 lista_spb = {}
 cnt_pb = 10
 rpb = 0
-lista_ln = {1:[21,589],2:[589,589]}
+lista_ln = {1:[269,589],2:[837,589]}
 lista_sln = {}
 cnt_ln = 3
 rln = 0
-lista_lb = {1:[21,21],2:[589,21]}
+lista_lb = {1:[269,21],2:[837,21]}
 lista_slb = {}
 cnt_lb = 3
 rlb = 0
-lista_nn = {1:[92,589],2:[518,589]}
+lista_nn = {1:[340,589],2:[766,589]}
 lista_snn = {}
 cnt_nn = 3
 rnn = 0
-lista_nb = {1:[92,21],2:[518,21]}
+lista_nb = {1:[340,21],2:[766,21]}
 lista_snb = {}
 cnt_nb = 3
 rnb = 0
-lista_sn = {1:[163,589],2:[447,589]}
+lista_sn = {1:[411,589],2:[695,589]}
 lista_ssn = {}
 cnt_sn = 3
 rsn = 0
-lista_sb = {1:[163,21],2:[447,21]}
+lista_sb = {1:[411,21],2:[695,21]}
 lista_ssb = {}
 cnt_sb = 3
 rsb = 0
-lista_gn = {1:[234,589],2:[376,589]}
+lista_gn = {1:[482,589],2:[624,589]}
 cnt_gn = 3
 rgn = 0
-lista_gb = {1:[234,21],2:[376,21]}
+lista_gb = {1:[482,21],2:[624,21]}
 cnt_gb = 3
 rgb = 0
-lista_tn = {1:[518,518]}
+lista_tn = {1:[766,518]}
 lista_stn = {}
 cnt_tn = 2
 rtn = 0
-lista_tb = {1:[92,92]}
+lista_tb = {1:[340,92]}
 lista_stb = {}
 cnt_tb = 2
 rtb = 0
-lista_bn = {1:[92,518]}
+lista_bn = {1:[340,518]}
 lista_sbn = {}
 cnt_bn = 2
 rbn = 0
-lista_bb = {1:[518,92]}
+lista_bb = {1:[766,92]}
 lista_sbb = {}
 cnt_bb = 2
 rbb = 0
-rey_n = [305,589]
-rey_b = [305,21]
+rey_n = [553,589]
+rey_b = [553,21]
+
 
 cnt_fw = 0
 cnt_bw = 0
@@ -1111,7 +1133,7 @@ while True:
 		sys.exit()
 	elif event.type == KEYDOWN and event.key == K_d and pos < max_history:
 		redraw()
-		move_forward()
+		exec move_forward()
 		hold_fw = True
 		if cnt_fw < 10:
 			cnt_fw += 1
@@ -1120,7 +1142,7 @@ while True:
 		cnt_fw = 0
 	elif event.type == KEYDOWN and event.key == K_a and pos > 0:
 		redraw()
-		move_back()
+		exec move_back()
 		hold_bw = True
 		if cnt_bw < 10:
 			cnt_bw += 1
@@ -1136,8 +1158,51 @@ while True:
 	mx,my = pygame.mouse.get_pos()
 #	pygame.draw.line(SCREEN, (0,0,0), (20,20), (mx,my))
 
-	# *** This reads the current position of pieces to place them ***
+	# *** Captured pieces display ***
+	for i in xrange(0, rpn):
+		mod = i*10
+		SCREEN.blit(pn_img, (940+mod, 375))	
+	for i in xrange(0, rpb):
+		mod = i*10
+		SCREEN.blit(pb_img, (25+mod, 21))	
+	for i in xrange(0, rln):
+		mod = i*10
+		SCREEN.blit(ln_img, (940+mod, 446))	
+	for i in xrange(0, rlb):
+		mod = i*10
+		SCREEN.blit(lb_img, (25+mod, 92))	
+	for i in xrange(0, rnn):
+		mod = i*10
+		SCREEN.blit(nn_img, (1051+mod, 446))	
+	for i in xrange(0, rnb):
+		mod = i*10
+		SCREEN.blit(nb_img, (136+mod, 92))	
+	for i in xrange(0, rsn):
+		mod = i*10
+		SCREEN.blit(sn_img, (940+mod, 517))	
+	for i in xrange(0, rsb):
+		mod = i*10
+		SCREEN.blit(sb_img, (25+mod, 163))	
+	for i in xrange(0, rgn):
+		mod = i*10
+		SCREEN.blit(gn_img, (1051+mod, 517))	
+	for i in xrange(0, rgb):
+		mod = i*10
+		SCREEN.blit(gb_img, (136+mod, 163))	
+	for i in xrange(0, rtn):
+		mod = i*10
+		SCREEN.blit(tn_img, (940+mod, 588))	
+	for i in xrange(0, rtb):
+		mod = i*10
+		SCREEN.blit(tb_img, (25+mod, 234))	
+	for i in xrange(0, rbn):
+		mod = i*10
+		SCREEN.blit(bn_img, (1031+mod, 588))	
+	for i in xrange(0, rbb):
+		mod = i*10
+		SCREEN.blit(bb_img, (116+mod, 234))	
 
+	# *** This reads the current position of pieces to place them ***
 	for k, pn in lista_pn.items():
 		SCREEN.blit(pn_img, pn)
 	for k, spn in lista_spn.items():
