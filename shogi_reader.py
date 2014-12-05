@@ -194,6 +194,10 @@ for e in movs:
 	piece_x = 0
 	piece_y = 0
 	frag = reg.match(e)
+	if frag.group(1) == "21":
+		for i in xrange(0,6):
+			buf =  frag.group(i)
+			print 'group('+str(i)+') =',buf
 	destiny = [coords_a[frag.group(5)[0]],coords_b[frag.group(5)[1]]]
 	if len(frag.group(5)) > 2:
 		if frag.group(5)[2] == '+':
@@ -708,6 +712,10 @@ for e in movs:
 						history.append(['lista_sbn['+(str)(k)+']',[destiny[0]-sbn[0],destiny[1]-sbn[1]], action, promoting, piece_respawn])
 						lista_sbn[k] = destiny
 						break
+			if kind == 'K':
+				if rey_n[0] == piece_x and rey_n[1] == piece_y:
+					history.append(['rey_n',[destiny[0]-rey_n[0],destiny[1]-rey_n[1]], action, promoting, piece_respawn])
+					rey_n = destiny
 		else: # Blancas
 			if kind == 'P':
 				for k, pb in lista_pb.items():
@@ -789,6 +797,10 @@ for e in movs:
 						history.append(['lista_sbb['+(str)(k)+']',[destiny[0]-sbb[0],destiny[1]-sbb[1]], action, promoting, piece_respawn])
 						lista_sbb[k] = destiny
 						break
+			if kind == 'K':
+				if rey_b[0] == piece_x and rey_b[1] == piece_y:
+					history.append(['rey_b',[destiny[0]-rey_b[0],destiny[1]-rey_b[1]], action, promoting, piece_respawn])
+					rey_b = destiny
 	else: # Action=2 (reingreso)
 		if int(frag.group(1)) % 2 == 1: #Negras
 			player = 'n'
