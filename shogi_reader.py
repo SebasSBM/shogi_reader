@@ -25,7 +25,6 @@
 	Control keys:
 		D -> Forward
 		A -> Backwards
-		R -> Revert Board
 
 	Open the files in "games_recorded" directory to see how it works.
 """
@@ -681,10 +680,10 @@ for e in movs:
 						break
 			if kind == '+P' or kind == '+L' or kind == '+N' or kind == '+S':
 				mem = kind[1].lower()
-				statem = 'for k, j in lamesa.lista_s'+mem+'n.items():\n\t'
+				statem = 'for k, j in lamesa.lista_s'+mem+'b.items():\n\t'
 				statem+= 'if j[0] == piece_x and j[1] == piece_y:\n\t\t'
 				statem+= 'history.append(["lista_s'+mem+'b["+(str)(k)+"]",[destiny[0]-j[0],destiny[1]-j[1]],'+(str)(action)+','+(str)(promoting)+',\''+piece_respawn+'\'])\n\t\t'
-				statem+= 'lamesa.lista_s'+mem+'b[k] = destiny'
+				statem+= 'lamesa.lista_s'+mem+'b[k] = destiny\n\t\t'
 				statem+= 'break'
 				exec statem
 			if kind == 'R':
