@@ -31,6 +31,7 @@
 
 import pygame, sys, re
 from pygame.locals import *
+from managers import *
 
 pygame.init()
 #reloj = pygame.time.Clock()
@@ -87,87 +88,8 @@ redraw()
 ###
 #
 
-# *** POSITIONS TABLE ***
-coords_a = {
-	'1': 837,
-	'2': 766,
-	'3': 695,
-	'4': 624,
-	'5': 553,
-	'6': 482,
-	'7': 411,
-	'8': 340,
-	'9': 269
-}
-coords_b = {
-	'i': 589,
-	'h': 518,
-	'g': 447,
-	'f': 376,
-	'e': 305,
-	'd': 234,
-	'c': 163,
-	'b': 92,
-	'a': 21
-}
-
-# *** Pieces arrays ***
-lista_pn = {1:[837,447],2:[766,447],3:[695,447],4:[624,447],5:[553,447],6:[482,447],7:[411,447],8:[340,447],9:[269,447]}
-lista_spn = {}
-cnt_pn = 10
-rpn = 0
-lista_pb = {1:[837,163],2:[766,163],3:[695,163],4:[624,163],5:[553,163],6:[482,163],7:[411,163],8:[340,163],9:[269,163]}
-lista_spb = {}
-cnt_pb = 10
-rpb = 0
-lista_ln = {1:[269,589],2:[837,589]}
-lista_sln = {}
-cnt_ln = 3
-rln = 0
-lista_lb = {1:[269,21],2:[837,21]}
-lista_slb = {}
-cnt_lb = 3
-rlb = 0
-lista_nn = {1:[340,589],2:[766,589]}
-lista_snn = {}
-cnt_nn = 3
-rnn = 0
-lista_nb = {1:[340,21],2:[766,21]}
-lista_snb = {}
-cnt_nb = 3
-rnb = 0
-lista_sn = {1:[411,589],2:[695,589]}
-lista_ssn = {}
-cnt_sn = 3
-rsn = 0
-lista_sb = {1:[411,21],2:[695,21]}
-lista_ssb = {}
-cnt_sb = 3
-rsb = 0
-lista_gn = {1:[482,589],2:[624,589]}
-cnt_gn = 3
-rgn = 0
-lista_gb = {1:[482,21],2:[624,21]}
-cnt_gb = 3
-rgb = 0
-lista_tn = {1:[766,518]}
-lista_stn = {}
-cnt_tn = 2
-rtn = 0
-lista_tb = {1:[340,92]}
-lista_stb = {}
-cnt_tb = 2
-rtb = 0
-lista_bn = {1:[340,518]}
-lista_sbn = {}
-cnt_bn = 2
-rbn = 0
-lista_bb = {1:[766,92]}
-lista_sbb = {}
-cnt_bb = 2
-rbb = 0
-rey_n = [553,589]
-rey_b = [553,21]
+# *** POSITIONS TABLE and Pieces arrays ***
+lamesa = coords_manager()
 
 # *** Motion log array ***
 history = []
@@ -194,23 +116,20 @@ for e in movs:
 	piece_x = 0
 	piece_y = 0
 	frag = reg.match(e)
-	if frag.group(1) == "21":
-		for i in xrange(0,6):
-			buf =  frag.group(i)
-			print 'group('+str(i)+') =',buf
-	destiny = [coords_a[frag.group(5)[0]],coords_b[frag.group(5)[1]]]
+	destiny = [lamesa.coords_x[frag.group(5)[0]],lamesa.coords_y[frag.group(5)[1]]]
+	destiny_h = frag.group(5)
 	if len(frag.group(5)) > 2:
 		if frag.group(5)[2] == '+':
 			promoting = True
 	if (len(frag.group(2)) > 1 and frag.group(2)[0] != '+') or (len(frag.group(2)) > 2 and frag.group(2)[0] == '+'):
 		if frag.group(2)[0] == '+':
 			kind = frag.group(2)[0:2]
-			piece_x = coords_a[frag.group(2)[2]]
-			piece_y = coords_b[frag.group(2)[3]]
+			piece_x = lamesa.coords_x[frag.group(2)[2]]
+			piece_y = lamesa.coords_y[frag.group(2)[3]]
 		else:
 			kind = frag.group(2)[0]
-			piece_x = coords_a[frag.group(2)[1]]
-			piece_y = coords_b[frag.group(2)[2]]
+			piece_x = lamesa.coords_x[frag.group(2)[1]]
+			piece_y = lamesa.coords_y[frag.group(2)[2]]
 	else:
 		kind = frag.group(2)
 	if frag.group(4) == 'x':
@@ -224,237 +143,237 @@ for e in movs:
 		if int(frag.group(1)) % 2 == 1: #Negras
 			found = False
 			while found == False:
-				for k, e in lista_pb.items():
+				for k, e in lamesa.lista_pb.items():
 					if e == destiny:
-						del lista_pb[k]
-						rpn += 1
-						piece_respawn = 'lista_pb['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_pb[k]
+						lamesa.rpn += 1
+						piece_respawn = 'lista_pb['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_spb.items():
+				for k, e in lamesa.lista_spb.items():
 					if e == destiny:
-						del lista_spb[k]
-						rpn += 1
-						piece_respawn = 'lista_spb['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_spb[k]
+						lamesa.rpn += 1
+						piece_respawn = 'lista_spb['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_lb.items():
+				for k, e in lamesa.lista_lb.items():
 					if e == destiny:
-						del lista_lb[k]
-						rln += 1
-						piece_respawn = 'lista_lb['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_lb[k]
+						lamesa.rln += 1
+						piece_respawn = 'lista_lb['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_slb.items():
+				for k, e in lamesa.lista_slb.items():
 					if e == destiny:
-						del lista_slb[k]
-						rln += 1
-						piece_respawn = 'lista_slb['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_slb[k]
+						lamesa.rln += 1
+						piece_respawn = 'lista_slb['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_nb.items():
+				for k, e in lamesa.lista_nb.items():
 					if e == destiny:
-						del lista_nb[k]
-						rnn += 1
-						piece_respawn = 'lista_nb['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_nb[k]
+						lamesa.rnn += 1
+						piece_respawn = 'lista_nb['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_snb.items():
+				for k, e in lamesa.lista_snb.items():
 					if e == destiny:
-						del lista_snb[k]
-						rnn += 1
-						piece_respawn = 'lista_snb['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_snb[k]
+						lamesa.rnn += 1
+						piece_respawn = 'lista_snb['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_sb.items():
+				for k, e in lamesa.lista_sb.items():
 					if e == destiny:
-						del lista_sb[k]
-						rsn += 1
-						piece_respawn = 'lista_sb['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_sb[k]
+						lamesa.rsn += 1
+						piece_respawn = 'lista_sb['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_ssb.items():
+				for k, e in lamesa.lista_ssb.items():
 					if e == destiny:
-						del lista_ssb[k]
-						rsn += 1
-						piece_respawn = 'lista_ssb['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_ssb[k]
+						lamesa.rsn += 1
+						piece_respawn = 'lista_ssb['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_gb.items():
+				for k, e in lamesa.lista_gb.items():
 					if e == destiny:
-						del lista_gb[k]
-						rgn += 1
-						piece_respawn = 'lista_gb['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_gb[k]
+						lamesa.rgn += 1
+						piece_respawn = 'lista_gb['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_tb.items():
+				for k, e in lamesa.lista_tb.items():
 					if e == destiny:
-						del lista_tb[k]
-						rtn += 1
-						piece_respawn = 'lista_tb['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_tb[k]
+						lamesa.rtn += 1
+						piece_respawn = 'lista_tb['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_stb.items():
+				for k, e in lamesa.lista_stb.items():
 					if e == destiny:
-						del lista_stb[k]
-						rtn += 1
-						piece_respawn = 'lista_stb['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_stb[k]
+						lamesa.rtn += 1
+						piece_respawn = 'lista_stb['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_bb.items():
+				for k, e in lamesa.lista_bb.items():
 					if e == destiny:
-						del lista_bb[k]
-						rbn += 1
-						piece_respawn = 'lista_bb['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_bb[k]
+						lamesa.rbn += 1
+						piece_respawn = 'lista_bb['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_sbb.items():
+				for k, e in lamesa.lista_sbb.items():
 					if e == destiny:
-						del lista_sbb[k]
-						rbn += 1
-						piece_respawn = 'lista_sbb['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_sbb[k]
+						lamesa.rbn += 1
+						piece_respawn = 'lista_sbb['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 		else: # Blancas
 			found = False
 			while found == False:
-				for k, e in lista_pn.items():
+				for k, e in lamesa.lista_pn.items():
 					if e == destiny:
-						del lista_pn[k]
-						rpb += 1
-						piece_respawn = 'lista_pn['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_pn[k]
+						lamesa.rpb += 1
+						piece_respawn = 'lista_pn['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_spn.items():
+				for k, e in lamesa.lista_spn.items():
 					if e == destiny:
-						del lista_spn[k]
-						rpb += 1
-						piece_respawn = 'lista_spn['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_spn[k]
+						lamesa.rpb += 1
+						piece_respawn = 'lista_spn['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_ln.items():
+				for k, e in lamesa.lista_ln.items():
 					if e == destiny:
-						del lista_ln[k]
-						rlb += 1
-						piece_respawn = 'lista_ln['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_ln[k]
+						lamesa.rlb += 1
+						piece_respawn = 'lista_ln['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_sln.items():
+				for k, e in lamesa.lista_sln.items():
 					if e == destiny:
-						del lista_sln[k]
-						rlb += 1
-						piece_respawn = 'lista_sln['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_sln[k]
+						lamesa.rlb += 1
+						piece_respawn = 'lista_sln['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_nn.items():
+				for k, e in lamesa.lista_nn.items():
 					if e == destiny:
-						del lista_nn[k]
-						rnb += 1
-						piece_respawn = 'lista_nn['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_nn[k]
+						lamesa.rnb += 1
+						piece_respawn = 'lista_nn['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_snn.items():
+				for k, e in lamesa.lista_snn.items():
 					if e == destiny:
-						del lista_snn[k]
-						rnb += 1
-						piece_respawn = 'lista_snn['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_snn[k]
+						lamesa.rnb += 1
+						piece_respawn = 'lista_snn['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_sn.items():
+				for k, e in lamesa.lista_sn.items():
 					if e == destiny:
-						del lista_sn[k]
-						rsb += 1
-						piece_respawn = 'lista_sn['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_sn[k]
+						lamesa.rsb += 1
+						piece_respawn = 'lista_sn['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_ssn.items():
+				for k, e in lamesa.lista_ssn.items():
 					if e == destiny:
-						del lista_ssn[k]
-						rsb += 1
-						piece_respawn = 'lista_ssn['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_ssn[k]
+						lamesa.rsb += 1
+						piece_respawn = 'lista_ssn['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_gn.items():
+				for k, e in lamesa.lista_gn.items():
 					if e == destiny:
-						del lista_gn[k]
-						rgb += 1
-						piece_respawn = 'lista_gn['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_gn[k]
+						lamesa.rgb += 1
+						piece_respawn = 'lista_gn['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_tn.items():
+				for k, e in lamesa.lista_tn.items():
 					if e == destiny:
-						del lista_tn[k]
-						rtb += 1
-						piece_respawn = 'lista_tn['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_tn[k]
+						lamesa.rtb += 1
+						piece_respawn = 'lista_tn['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_stn.items():
+				for k, e in lamesa.lista_stn.items():
 					if e == destiny:
-						del lista_stn[k]
-						rtb += 1
-						piece_respawn = 'lista_stn['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_stn[k]
+						lamesa.rtb += 1
+						piece_respawn = 'lista_stn['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_bn.items():
+				for k, e in lamesa.lista_bn.items():
 					if e == destiny:
-						del lista_bn[k]
-						rbb += 1
-						piece_respawn = 'lista_bn['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_bn[k]
+						lamesa.rbb += 1
+						piece_respawn = 'lista_bn['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 				if found == True:
 					 break
-				for k, e in lista_sbn.items():
+				for k, e in lamesa.lista_sbn.items():
 					if e == destiny:
-						del lista_sbn[k]
-						rbb += 1
-						piece_respawn = 'lista_sbn['+(str)(k)+']=['+(str)(e[0])+','+(str)(e[1])+']'
+						del lamesa.lista_sbn[k]
+						lamesa.rbb += 1
+						piece_respawn = 'lista_sbn['+(str)(k)+']=[lamesa.coords_x["'+destiny_h[0]+'"],lamesa.coords_y["'+destiny_h[1]+'"]]'
 						found = True
 						break
 
@@ -462,345 +381,345 @@ for e in movs:
 	if piece_x == 0 and action != 2:
 		if int(frag.group(1)) % 2 == 1: #Negras
 			if kind == 'P':
-				for k, pn in lista_pn.items():
+				for k, pn in lamesa.lista_pn.items():
 					if destiny[0] == pn[0] and destiny[1] == pn[1]-71:
 						history.append(['lista_pn['+(str)(k)+']',[0,-71], action, promoting, piece_respawn])
-						lista_pn[k] = destiny
+						lamesa.lista_pn[k] = destiny
 						if promoting == True:
-							del lista_pn[k]
-							lista_spn[k] = destiny
+							del lamesa.lista_pn[k]
+							lamesa.lista_spn[k] = destiny
 						break
 			if kind == 'L':
-				for k, ln in lista_ln.items():
+				for k, ln in lamesa.lista_ln.items():
 					if destiny[0] == ln[0] and destiny[1] < ln[1]:
 						history.append(['lista_ln['+(str)(k)+']',[0,destiny[1]-ln[1]], action, promoting, piece_respawn])
-						lista_ln[k] = destiny
+						lamesa.lista_ln[k] = destiny
 						if promoting == True:
-							del lista_ln[k]
-							lista_sln[k] = destiny
+							del lamesa.lista_ln[k]
+							lamesa.lista_sln[k] = destiny
 						break
 			if kind == 'N':
-				for k, nn in lista_nn.items():
+				for k, nn in lamesa.lista_nn.items():
 					if (destiny[0] == nn[0]+71 or destiny[0] == nn[0]-71 ) and destiny[1] == nn[1]-142:
 						history.append(['lista_nn['+(str)(k)+']',[destiny[0]-nn[0],destiny[1]-nn[1]], action, promoting, piece_respawn])
-						lista_nn[k] = destiny
+						lamesa.lista_nn[k] = destiny
 						if promoting == True:
-							del lista_nn[k]
-							lista_snn[k] = destiny
+							del lamesa.lista_nn[k]
+							lamesa.lista_snn[k] = destiny
 						break
 			if kind == 'S':
-				for k, sn in lista_sn.items():
+				for k, sn in lamesa.lista_sn.items():
 					if (destiny[0] <= sn[0]+71 and destiny[0] >= sn[0]-71 and destiny[1] == sn[1]-71) or ((destiny[0] == sn[0]+71 or destiny[0] == sn[0]-71) and destiny[1] == sn[1]+71):
 						history.append(['lista_sn['+(str)(k)+']',[destiny[0]-sn[0],destiny[1]-sn[1]], action, promoting, piece_respawn])
-						lista_sn[k] = destiny
+						lamesa.lista_sn[k] = destiny
 						if promoting == True:
-							del lista_sn[k]
-							lista_ssn[k] = destiny
+							del lamesa.lista_sn[k]
+							lamesa.lista_ssn[k] = destiny
 						break
 			if kind == 'G':
-				for k, gn in lista_gn.items():
+				for k, gn in lamesa.lista_gn.items():
 					if (destiny[0] <= gn[0]+71 and destiny[0] >= gn[0]-71 and destiny[1] == gn[1]-71) or ((destiny[0] == gn[0]+71 or destiny[0] == gn[0]-71) and destiny[1] == gn[1]) or (destiny[0] == gn[0] and destiny[1] == gn[1]+71):
 						history.append(['lista_gn['+(str)(k)+']',[destiny[0]-gn[0],destiny[1]-gn[1]], action, promoting, piece_respawn])
-						lista_gn[k] = destiny
+						lamesa.lista_gn[k] = destiny
 						break
 			if kind == '+P' or kind == '+L' or kind == '+N' or kind == '+S':
 				mem = kind[1].lower()
-				statem = 'for k, j in lista_s'+mem+'n.items():\n\t'
+				statem = 'for k, j in lamesa.lista_s'+mem+'n.items():\n\t'
 				statem+= 'if (destiny[0] <= j[0]+71 and destiny[0] >= j[0]-71 and destiny[1] == j[1]-71) or ((destiny[0] == j[0]+71 or destiny[0] == j[0]-71) and destiny[1] == j[1]) or (destiny[0] == j[0] and destiny[1] == j[1]+71):\n\t\t'
-				statem+= 'history.append(["lista_s'+mem+'n["+(str)(k)+"]",[destiny[0]-j[0],destiny[1]-j[1]],'+(str)(action)+','+(str)(promoting)+',"'+piece_respawn+'"])\n\t\t'
-				statem+= 'lista_s'+mem+'n[k] = destiny\n\t\t'
+				statem+= 'history.append(["lista_s'+mem+'n["+(str)(k)+"]",[destiny[0]-j[0],destiny[1]-j[1]],'+(str)(action)+','+(str)(promoting)+',\''+piece_respawn+'\'])\n\t\t'
+				statem+= 'lamesa.lista_s'+mem+'n[k] = destiny\n\t\t'
 				statem+= 'break'
 				exec statem
 			if kind == 'R':
-				for k, tn in lista_tn.items():
+				for k, tn in lamesa.lista_tn.items():
 					if (destiny[0] == tn[0]) != (destiny[1] == tn[1]):
 						history.append(['lista_tn['+(str)(k)+']',[destiny[0]-tn[0],destiny[1]-tn[1]], action, promoting, piece_respawn])
-						lista_tn[k] = destiny
+						lamesa.lista_tn[k] = destiny
 						if promoting == True:
-							del lista_tn[k]
-							lista_stn[k] = destiny
+							del lamesa.lista_tn[k]
+							lamesa.lista_stn[k] = destiny
 						break
 			if kind == '+R':
-				for k, stn in lista_stn.items():
+				for k, stn in lamesa.lista_stn.items():
 					if ((destiny[0] == stn[0]) != (destiny[1] == stn[1])) or (destiny[0] <= stn[0]+71 and destiny[0] >= stn[0]-71 and destiny[1] <= stn[1]+71 and destiny[1] >= stn[1]-71):
 						history.append(['lista_stn['+(str)(k)+']',[destiny[0]-stn[0],destiny[1]-stn[1]], action, promoting, piece_respawn])
-						lista_stn[k] = destiny
+						lamesa.lista_stn[k] = destiny
 						break
 			if kind == 'B':
-				for k, bn in lista_bn.items():
+				for k, bn in lamesa.lista_bn.items():
 					if abs(destiny[0]-bn[0]) == abs(destiny[1]-bn[1]):
 						history.append(['lista_bn['+(str)(k)+']',[destiny[0]-bn[0],destiny[1]-bn[1]], action, promoting, piece_respawn])
-						lista_bn[k] = destiny
+						lamesa.lista_bn[k] = destiny
 						if promoting == True:
-							del lista_bn[k]
-							lista_sbn[k] = destiny
+							del lamesa.lista_bn[k]
+							lamesa.lista_sbn[k] = destiny
 						break
 			if kind == '+B':
-				for k, sbn in lista_sbn.items():
+				for k, sbn in lamesa.lista_sbn.items():
 					if (abs(destiny[0]-sbn[0]) == abs(destiny[1]-sbn[1])) or (destiny[0] <= sbn[0]+71 and destiny[0] >= sbn[0]-71 and destiny[1] <= sbn[1]+71 and destiny[1] >= sbn[1]-71):
 						history.append(['lista_sbn['+(str)(k)+']',[destiny[0]-sbn[0],destiny[1]-sbn[1]], action, promoting, piece_respawn])
-						lista_sbn[k] = destiny
+						lamesa.lista_sbn[k] = destiny
 						break
 			if kind == 'K':
-				if destiny[0] <= rey_n[0]+71 and destiny[0] >= rey_n[0]-71 and destiny[1] <= rey_n[1]+71 and destiny[1] >= rey_n[1]-71:
-					history.append(['rey_n',[destiny[0]-rey_n[0],destiny[1]-rey_n[1]], action, promoting, piece_respawn])
-					rey_n = destiny
+				if destiny[0] <= lamesa.rey_n[0]+71 and destiny[0] >= lamesa.rey_n[0]-71 and destiny[1] <= lamesa.rey_n[1]+71 and destiny[1] >= lamesa.rey_n[1]-71:
+					history.append(['rey_n',[destiny[0]-lamesa.rey_n[0],destiny[1]-lamesa.rey_n[1]], action, promoting, piece_respawn])
+					lamesa.rey_n = destiny
 		else: #Blancas
 			if kind == 'P':
-				for k, pb in lista_pb.items():
+				for k, pb in lamesa.lista_pb.items():
 					if destiny[0] == pb[0] and destiny[1] == pb[1]+71:
 						history.append(['lista_pb['+(str)(k)+']',[0, 71], action, promoting, piece_respawn])
-						lista_pb[k] = destiny
+						lamesa.lista_pb[k] = destiny
 						if promoting == True:
-							del lista_pb[k]
-							lista_spb[k] = destiny
+							del lamesa.lista_pb[k]
+							lamesa.lista_spb[k] = destiny
 						break
 			if kind == 'L':
-				for k, lb in lista_lb.items():
+				for k, lb in lamesa.lista_lb.items():
 					if destiny[0] == lb[0] and destiny[1] > lb[1]:
 						history.append(['lista_lb['+(str)(k)+']',[0,destiny[1]-lb[1]], action, promoting, piece_respawn])
-						lista_lb[k] = destiny
+						lamesa.lista_lb[k] = destiny
 						if promoting == True:
-							del lista_lb[k]
-							lista_slb[k] = destiny
+							del lamesa.lista_lb[k]
+							lamesa.lista_slb[k] = destiny
 						break
 			if kind == 'N':
-				for k, nb in lista_nb.items():
+				for k, nb in lamesa.lista_nb.items():
 					if (destiny[0] == nb[0]+71 or destiny[0] == nb[0]-71 ) and destiny[1] == nb[1]+142:
 						history.append(['lista_nb['+(str)(k)+']',[destiny[0]-nb[0],destiny[1]-nb[1]], action, promoting, piece_respawn])
-						lista_nb[k] = destiny
+						lamesa.lista_nb[k] = destiny
 						if promoting == True:
-							del lista_nb[k]
-							lista_snb[k] = destiny
+							del lamesa.lista_nb[k]
+							lamesa.lista_snb[k] = destiny
 						break
 			if kind == 'S':
-				for k, sb in lista_sb.items():
+				for k, sb in lamesa.lista_sb.items():
 					if (destiny[0] <= sb[0]+71 and destiny[0] >= sb[0]-71 and destiny[1] == sb[1]+71) or ((destiny[0] == sb[0]+71 or destiny[0] == sb[0]-71) and destiny[1] == sb[1]-71):
 						history.append(['lista_sb['+(str)(k)+']',[destiny[0]-sb[0],destiny[1]-sb[1]], action, promoting, piece_respawn])
-						lista_sb[k] = destiny
+						lamesa.lista_sb[k] = destiny
 						if promoting == True:
-							del lista_sb[k]
-							lista_ssb[k] = destiny
+							del lamesa.lista_sb[k]
+							lamesa.lista_ssb[k] = destiny
 						break
 			if kind == 'G':
-				for k, gb in lista_gb.items():
+				for k, gb in lamesa.lista_gb.items():
 					if (destiny[0] <= gb[0]+71 and destiny[0] >= gb[0]-71 and destiny[1] == gb[1]+71) or ((destiny[0] == gb[0]+71 or destiny[0] == gb[0]-71) and destiny[1] == gb[1]) or (destiny[0] == gb[0] and destiny[1] == gb[1]-71):
 						history.append(['lista_gb['+(str)(k)+']',[destiny[0]-gb[0],destiny[1]-gb[1]], action, promoting, piece_respawn])
-						lista_gb[k] = destiny
+						lamesa.lista_gb[k] = destiny
 						break
 			if kind == '+P' or kind == '+L' or kind == '+N' or kind == '+S':
 				mem = kind[1].lower()
-				statem = 'for k, j in lista_s'+mem+'b.items():\n\t'
+				statem = 'for k, j in lamesa.lista_s'+mem+'b.items():\n\t'
 				statem+= 'if (destiny[0] <= j[0]+71 and destiny[0] >= j[0]-71 and destiny[1] == j[1]+71) or ((destiny[0] == j[0]+71 or destiny[0] == j[0]-71) and destiny[1] == j[1]) or (destiny[0] == j[0] and destiny[1] == j[1]-71):\n\t\t'
-				statem+= 'history.append(["lista_s'+mem+'b["+(str)(k)+"]",[destiny[0]-j[0],destiny[1]-j[1]],'+(str)(action)+','+(str)(promoting)+',"'+piece_respawn+'"])\n\t\t'
-				statem+= 'lista_s'+mem+'b[k] = destiny\n\t\t'
+				statem+= 'history.append(["lista_s'+mem+'b["+(str)(k)+"]",[destiny[0]-j[0],destiny[1]-j[1]],'+(str)(action)+','+(str)(promoting)+',\''+piece_respawn+'\'])\n\t\t'
+				statem+= 'lamesa.lista_s'+mem+'b[k] = destiny\n\t\t'
 				statem+= 'break'
 				exec statem
 			if kind == 'R':
-				for k, tb in lista_tb.items():
+				for k, tb in lamesa.lista_tb.items():
 					if (destiny[0] == tb[0]) != (destiny[1] == tb[1]):
 						history.append(['lista_tb['+(str)(k)+']',[destiny[0]-tb[0],destiny[1]-tb[1]], action, promoting, piece_respawn])
-						lista_tb[k] = destiny
+						lamesa.lista_tb[k] = destiny
 						if promoting == True:
-							del lista_tb[k]
-							lista_stb[k] = destiny
+							del lamesa.lista_tb[k]
+							lamesa.lista_stb[k] = destiny
 						break
 			if kind == '+R':
-				for k, stb in lista_stb.items():
+				for k, stb in lamesa.lista_stb.items():
 					if ((destiny[0] == stb[0]) != (destiny[1] == stb[1])) or (destiny[0] <= stb[0]+71 and destiny[0] >= stb[0]-71 and destiny[1] <= stb[1]+71 and destiny[1] >= stb[1]-71):
 						history.append(['lista_stb['+(str)(k)+']',[destiny[0]-stb[0],destiny[1]-stb[1]], action, promoting, piece_respawn])
-						lista_stb[k] = destiny
+						lamesa.lista_stb[k] = destiny
 						break
 			if kind == 'B':
-				for k, bb in lista_bb.items():
+				for k, bb in lamesa.lista_bb.items():
 					if abs(destiny[0]-bb[0]) == abs(destiny[1]-bb[1]):
 						history.append(['lista_bb['+(str)(k)+']',[destiny[0]-bb[0],destiny[1]-bb[1]], action, promoting, piece_respawn])
-						lista_bb[k] = destiny
+						lamesa.lista_bb[k] = destiny
 						if promoting == True:
-							del lista_bb[k]
-							lista_sbb[k] = destiny
+							del lamesa.lista_bb[k]
+							lamesa.lista_sbb[k] = destiny
 						break
 			if kind == '+B':
-				for k, sbb in lista_sbb.items():
+				for k, sbb in lamesa.lista_sbb.items():
 					if (abs(destiny[0]-sbb[0]) == abs(destiny[1]-sbb[1])) or (destiny[0] <= sbb[0]+71 and destiny[0] >= sbb[0]-71 and destiny[1] <= sbb[1]+71 and destiny[1] >= sbb[1]-71):
 						history.append(['lista_sbb['+(str)(k)+']',[destiny[0]-sbb[0],destiny[1]-sbb[1]], action, promoting, piece_respawn])
-						lista_sbb[k] = destiny
+						lamesa.lista_sbb[k] = destiny
 						break
 			if kind == 'K':
-				if destiny[0] <= rey_b[0]+71 and destiny[0] >= rey_b[0]-71 and destiny[1] <= rey_b[1]+71 and destiny[1] >= rey_b[1]-71:
-					history.append(['rey_b',[destiny[0]-rey_b[0],destiny[1]-rey_b[1]], action, promoting, piece_respawn])
-					rey_b = destiny
+				if destiny[0] <= lamesa.rey_b[0]+71 and destiny[0] >= lamesa.rey_b[0]-71 and destiny[1] <= lamesa.rey_b[1]+71 and destiny[1] >= lamesa.rey_b[1]-71:
+					history.append(['rey_b',[destiny[0]-lamesa.rey_b[0],destiny[1]-lamesa.rey_b[1]], action, promoting, piece_respawn])
+					lamesa.rey_b = destiny
 	elif action != 2:
 		if int(frag.group(1)) % 2 == 1: #Negras
 			if kind == 'P':
-				for k, pn in lista_pn.items():
+				for k, pn in lamesa.lista_pn.items():
 					if pn[0] == piece_x and pn[1] == piece_y:
 						history.append(['lista_pn['+(str)(k)+']',[0,-71], action, promoting, piece_respawn])
-						lista_pn[k] = destiny
+						lamesa.lista_pn[k] = destiny
 						if promoting == True:
-							del lista_pn[k]
-							lista_spn[k] = destiny
+							del lamesa.lista_pn[k]
+							lamesa.lista_spn[k] = destiny
 						break
 			if kind == 'L':
-				for k, ln in lista_ln.items():
+				for k, ln in lamesa.lista_ln.items():
 					if ln[0] == piece_x and ln[1] == piece_y:
 						history.append(['lista_ln['+(str)(k)+']',[0,destiny[1]-ln[1]], action, promoting, piece_respawn])
-						lista_ln[k] = destiny
+						lamesa.lista_ln[k] = destiny
 						if promoting == True:
-							del lista_ln[k]
-							lista_sln[k] = destiny
+							del lamesa.lista_ln[k]
+							lamesa.lista_sln[k] = destiny
 						break
 			if kind == 'N':
-				for k, nn in lista_nn.items():
+				for k, nn in lamesa.lista_nn.items():
 					if nn[0] == piece_x and nn[1] == piece_y:
 						history.append(['lista_nn['+(str)(k)+']',[destiny[0]-nn[0],destiny[1]-nn[1]], action, promoting, piece_respawn])
-						lista_nn[k] = destiny
+						lamesa.lista_nn[k] = destiny
 						if promoting == True:
-							del lista_nn[k]
-							lista_snn[k] = destiny
+							del lamesa.lista_nn[k]
+							lamesa.lista_snn[k] = destiny
 						break
 			if kind == 'S':
-				for k, sn in lista_sn.items():
+				for k, sn in lamesa.lista_sn.items():
 					if sn[0] == piece_x and sn[1] == piece_y:
 						history.append(['lista_sn['+(str)(k)+']',[destiny[0]-sn[0],destiny[1]-sn[1]], action, promoting, piece_respawn])
-						lista_sn[k] = destiny
+						lamesa.lista_sn[k] = destiny
 						if promoting == True:
-							del lista_sn[k]
-							lista_ssn[k] = destiny
+							del lamesa.lista_sn[k]
+							lamesa.lista_ssn[k] = destiny
 						break
 			if kind == 'G':
-				for k, gn in lista_gn.items():
+				for k, gn in lamesa.lista_gn.items():
 					if gn[0] == piece_x and gn[1] == piece_y:
 						history.append(['lista_gn['+(str)(k)+']',[destiny[0]-gn[0],destiny[1]-gn[1]], action, promoting, piece_respawn])
-						lista_gn[k] = destiny
+						lamesa.lista_gn[k] = destiny
 						break
 			if kind == '+P' or kind == '+L' or kind == '+N' or kind == '+S':
 				mem = kind[1].lower()
-				statem = 'for k, j in lista_s'+mem+'n.items():\n\t'
+				statem = 'for k, j in lamesa.lista_s'+mem+'n.items():\n\t'
 				statem+= 'if j[0] == piece_x and j[1] == piece_y:\n\t\t'
-				statem+= 'history.append(["lista_s'+mem+'n["+(str)(k)+"]",[destiny[0]-j[0],destiny[1]-j[1]],'+(str)(action)+','+(str)(promoting)+',"'+piece_respawn+'"])\n\t\t'
-				statem+= 'lista_s'+mem+'n[k] = destiny\n\t\t'
+				statem+= 'history.append(["lista_s'+mem+'n["+(str)(k)+"]",[destiny[0]-j[0],destiny[1]-j[1]],'+(str)(action)+','+(str)(promoting)+',\''+piece_respawn+'\'])\n\t\t'
+				statem+= 'lamesa.lista_s'+mem+'n[k] = destiny\n\t\t'
 				statem+= 'break'
 				exec statem
 			if kind == 'R':
-				for k, tn in lista_tn.items():
+				for k, tn in lamesa.lista_tn.items():
 					if tn[0] == piece_x and tn[1] == piece_y:
 						history.append(['lista_tn['+(str)(k)+']',[destiny[0]-tn[0],destiny[1]-tn[1]], action, promoting, piece_respawn])
-						lista_tn[k] = destiny
+						lamesa.lista_tn[k] = destiny
 						if promoting == True:
-							del lista_tn[k]
-							lista_stn[k] = destiny
+							del lamesa.lista_tn[k]
+							lamesa.lista_stn[k] = destiny
 						break
 			if kind == '+R':
-				for k, stn in lista_stn.items():
+				for k, stn in lamesa.lista_stn.items():
 					if stn[0] == piece_x and stn[1] == piece_y:
 						history.append(['lista_stn['+(str)(k)+']',[destiny[0]-stn[0],destiny[1]-stn[1]], action, promoting, piece_respawn])
-						lista_stn[k] = destiny
+						lamesa.lista_stn[k] = destiny
 						break
 			if kind == 'B':
-				for k, bn in lista_bn.items():
+				for k, bn in lamesa.lista_bn.items():
 					if bn[0] == piece_x and bn[1] == piece_y:
 						history.append(['lista_bn['+(str)(k)+']',[destiny[0]-bn[0],destiny[1]-bn[1]], action, promoting, piece_respawn])
-						lista_bn[k] = destiny
+						lamesa.lista_bn[k] = destiny
 						if promoting == True:
-							del lista_bn[k]
-							lista_sbn[k] = destiny
+							del lamesa.lista_bn[k]
+							lamesa.lista_sbn[k] = destiny
 						break
 			if kind == '+B':
-				for k, sbn in lista_sbn.items():
+				for k, sbn in lamesa.lista_sbn.items():
 					if sbn[0] == piece_x and sbn[1] == piece_y:
 						history.append(['lista_sbn['+(str)(k)+']',[destiny[0]-sbn[0],destiny[1]-sbn[1]], action, promoting, piece_respawn])
-						lista_sbn[k] = destiny
+						lamesa.lista_sbn[k] = destiny
 						break
 			if kind == 'K':
-				if rey_n[0] == piece_x and rey_n[1] == piece_y:
-					history.append(['rey_n',[destiny[0]-rey_n[0],destiny[1]-rey_n[1]], action, promoting, piece_respawn])
-					rey_n = destiny
+				if lamesa.rey_n[0] == piece_x and lamesa.rey_n[1] == piece_y:
+					history.append(['rey_n',[destiny[0]-lamesa.rey_n[0],destiny[1]-lamesa.rey_n[1]], action, promoting, piece_respawn])
+					lamesa.rey_n = destiny
 		else: # Blancas
 			if kind == 'P':
-				for k, pb in lista_pb.items():
+				for k, pb in lamesa.lista_pb.items():
 					if pb[0] == piece_x and pb[1] == piece_y:
 						history.append(['lista_pb['+(str)(k)+']',[0,+71], action, promoting, piece_respawn])
-						lista_pb[k] = destiny
+						lamesa.lista_pb[k] = destiny
 						if promoting == True:
-							del lista_pb[k]
-							lista_spb[k] = destiny
+							del lamesa.lista_pb[k]
+							lamesa.lista_spb[k] = destiny
 						break
 			if kind == 'L':
-				for k, lb in lista_lb.items():
+				for k, lb in lamesa.lista_lb.items():
 					if lb[0] == piece_x and lb[1] == piece_y:
 						history.append(['lista_lb['+(str)(k)+']',[0,destiny[1]-lb[1]], action, promoting, piece_respawn])
-						lista_lb[k] = destiny
+						lamesa.lista_lb[k] = destiny
 						if promoting == True:
-							del lista_lb[k]
-							lista_slb[k] = destiny
+							del lamesa.lista_lb[k]
+							lamesa.lista_slb[k] = destiny
 						break
 			if kind == 'N':
-				for k, nb in lista_nb.items():
+				for k, nb in lamesa.lista_nb.items():
 					if nb[0] == piece_x and nb[1] == piece_y:
 						history.append(['lista_nb['+(str)(k)+']',[destiny[0]-nb[0],destiny[1]-nb[1]], action, promoting, piece_respawn])
-						lista_nb[k] = destiny
+						lamesa.lista_nb[k] = destiny
 						if promoting == True:
-							del lista_nb[k]
-							lista_snb[k] = destiny
+							del lamesa.lista_nb[k]
+							lamesa.lista_snb[k] = destiny
 						break
 			if kind == 'S':
-				for k, sb in lista_sb.items():
+				for k, sb in lamesa.lista_sb.items():
 					if sb[0] == piece_x and sb[1] == piece_y:
 						history.append(['lista_sb['+(str)(k)+']',[destiny[0]-sb[0],destiny[1]-sb[1]], action, promoting, piece_respawn])
-						lista_sb[k] = destiny
+						lamesa.lista_sb[k] = destiny
 						if promoting == True:
-							del lista_sb[k]
-							lista_ssb[k] = destiny
+							del lamesa.lista_sb[k]
+							lamesa.lista_ssb[k] = destiny
 						break
 			if kind == 'G':
-				for k, gb in lista_gb.items():
+				for k, gb in lamesa.lista_gb.items():
 					if gb[0] == piece_x and gb[1] == piece_y:
 						history.append(['lista_gb['+(str)(k)+']',[destiny[0]-gb[0],destiny[1]-gb[1]], action, promoting, piece_respawn])
-						lista_gb[k] = destiny
+						lamesa.lista_gb[k] = destiny
 						break
 			if kind == '+P' or kind == '+L' or kind == '+N' or kind == '+S':
 				mem = kind[1].lower()
-				statem = 'for k, j in lista_s'+mem+'n.items():\n\t'
+				statem = 'for k, j in lamesa.lista_s'+mem+'n.items():\n\t'
 				statem+= 'if j[0] == piece_x and j[1] == piece_y:\n\t\t'
-				statem+= 'history.append(["lista_s'+mem+'b["+(str)(k)+"]",[destiny[0]-j[0],destiny[1]-j[1]],'+(str)(action)+','+(str)(promoting)+',"'+piece_respawn+'"])\n\t\t'
-				statem+= 'lista_s'+mem+'b[k] = destiny'
+				statem+= 'history.append(["lista_s'+mem+'b["+(str)(k)+"]",[destiny[0]-j[0],destiny[1]-j[1]],'+(str)(action)+','+(str)(promoting)+',\''+piece_respawn+'\'])\n\t\t'
+				statem+= 'lamesa.lista_s'+mem+'b[k] = destiny'
 				statem+= 'break'
 				exec statem
 			if kind == 'R':
-				for k, tb in lista_tb.items():
+				for k, tb in lamesa.lista_tb.items():
 					if tb[0] == piece_x and tb[1] == piece_y:
 						history.append(['lista_tb['+(str)(k)+']',[destiny[0]-tb[0],destiny[1]-tb[1]], action, promoting, piece_respawn])
-						lista_tb[k] = destiny
+						lamesa.lista_tb[k] = destiny
 						if promoting == True:
-							del lista_tb[k]
-							lista_stb[k] = destiny
+							del lamesa.lista_tb[k]
+							lamesa.lista_stb[k] = destiny
 						break
 			if kind == '+R':
-				for k, stb in lista_stb.items():
+				for k, stb in lamesa.lista_stb.items():
 					if stb[0] == piece_x and stb[1] == piece_y:
 						history.append(['lista_stb['+(str)(k)+']',[destiny[0]-stb[0],destiny[1]-stb[1]], action, promoting, piece_respawn])
-						lista_stb[k] = destiny
+						lamesa.lista_stb[k] = destiny
 						break
 			if kind == 'B':
-				for k, bb in lista_bb.items():
+				for k, bb in lamesa.lista_bb.items():
 					if bb[0] == piece_x and bb[1] == piece_y:
 						history.append(['lista_bb['+(str)(k)+']',[destiny[0]-bb[0],destiny[1]-bb[1]], action, promoting, piece_respawn])
-						lista_bb[k] = destiny
+						lamesa.lista_bb[k] = destiny
 						if promoting == True:
-							del lista_bb[k]
-							lista_sbb[k] = destiny
+							del lamesa.lista_bb[k]
+							lamesa.lista_sbb[k] = destiny
 						break
 			if kind == '+B':
-				for k, sbb in lista_sbb.items():
+				for k, sbb in lamesa.lista_sbb.items():
 					if sbb[0] == piece_x and sbb[1] == piece_y:
 						history.append(['lista_sbb['+(str)(k)+']',[destiny[0]-sbb[0],destiny[1]-sbb[1]], action, promoting, piece_respawn])
-						lista_sbb[k] = destiny
+						lamesa.lista_sbb[k] = destiny
 						break
 			if kind == 'K':
-				if rey_b[0] == piece_x and rey_b[1] == piece_y:
-					history.append(['rey_b',[destiny[0]-rey_b[0],destiny[1]-rey_b[1]], action, promoting, piece_respawn])
-					rey_b = destiny
+				if lamesa.rey_b[0] == piece_x and lamesa.rey_b[1] == piece_y:
+					history.append(['rey_b',[destiny[0]-lamesa.rey_b[0],destiny[1]-lamesa.rey_b[1]], action, promoting, piece_respawn])
+					lamesa.rey_b = destiny
 	else: # Action=2 (reingreso)
 		if int(frag.group(1)) % 2 == 1: #Negras
 			player = 'n'
@@ -809,144 +728,87 @@ for e in movs:
 
 		if kind == 'P':
 			if player == 'n':
-				history.append([['pn',cnt_pn], destiny, action, promoting, piece_respawn])	
-				lista_pn[cnt_pn] = destiny
-				cnt_pn += 1
-				rpn -= 1
+				history.append([['pn',lamesa.cnt_pn], destiny_h, action, promoting, piece_respawn])	
+				lamesa.lista_pn[lamesa.cnt_pn] = destiny
+				lamesa.cnt_pn += 1
+				lamesa.rpn -= 1
 			else:
-				history.append([['pb',cnt_pb], destiny, action, promoting, piece_respawn])	
-				lista_pb[cnt_pb] = destiny
-				cnt_pb += 1
-				rpb -= 1
+				history.append([['pb',lamesa.cnt_pb], destiny_h, action, promoting, piece_respawn])	
+				lamesa.lista_pb[lamesa.cnt_pb] = destiny
+				lamesa.cnt_pb += 1
+				lamesa.rpb -= 1
 		if kind == 'L':
 			if player == 'n':
-				history.append([['ln',cnt_ln], destiny, action, promoting, piece_respawn])
-				lista_ln[cnt_ln] = destiny
-				cnt_ln += 1
-				rln -= 1
+				history.append([['ln',lamesa.cnt_ln], destiny_h, action, promoting, piece_respawn])
+				lamesa.lista_ln[lamesa.cnt_ln] = destiny
+				lamesa.cnt_ln += 1
+				lamesa.rln -= 1
 			else:
-				history.append([['lb',cnt_lb], destiny, action, promoting, piece_respawn])
-				lista_lb[cnt_lb] = destiny
-				cnt_lb += 1
-				rlb -= 1
+				history.append([['lb',lamesa.cnt_lb], destiny_h, action, promoting, piece_respawn])
+				lamesa.lista_lb[lamesa.cnt_lb] = destiny
+				lamesa.cnt_lb += 1
+				lamesa.rlb -= 1
 		if kind == 'N':
 			if player == 'n':
-				history.append([['nn',cnt_nn], destiny, action, promoting, piece_respawn])
-				lista_nn[cnt_nn] = destiny
-				cnt_nn += 1
-				rnn -= 1
+				history.append([['nn',lamesa.cnt_nn], destiny_h, action, promoting, piece_respawn])
+				lamesa.lista_nn[lamesa.cnt_nn] = destiny
+				lamesa.cnt_nn += 1
+				lamesa.rnn -= 1
 			else:
-				history.append([['nb',cnt_nb], destiny, action, promoting, piece_respawn])
-				lista_nb[cnt_nb] = destiny
-				cnt_nb += 1
-				rnb -= 1
+				history.append([['nb',lamesa.cnt_nb], destiny_h, action, promoting, piece_respawn])
+				lamesa.lista_nb[lamesa.cnt_nb] = destiny
+				lamesa.cnt_nb += 1
+				lamesa.rnb -= 1
 		if kind == 'S':
 			if player == 'n':
-				history.append([['sn',cnt_sn], destiny, action, promoting, piece_respawn])
-				lista_sn[cnt_sn] = destiny
-				cnt_sn += 1
-				rsn -= 1
+				history.append([['sn',lamesa.cnt_sn], destiny_h, action, promoting, piece_respawn])
+				lamesa.lista_sn[lamesa.cnt_sn] = destiny
+				lamesa.cnt_sn += 1
+				lamesa.rsn -= 1
 			else:
-				history.append([['sb',cnt_sb], destiny, action, promoting, piece_respawn])
-				lista_sb[cnt_sb] = destiny
-				cnt_sb += 1
-				rsb -= 1
+				history.append([['sb',lamesa.cnt_sb], destiny_h, action, promoting, piece_respawn])
+				lamesa.lista_sb[lamesa.cnt_sb] = destiny
+				lamesa.cnt_sb += 1
+				lamesa.rsb -= 1
 		if kind == 'G':
 			if player == 'n':
-				history.append([['gn',cnt_gn], destiny, action, promoting, piece_respawn])
-				lista_gn[cnt_gn] = destiny
-				cnt_gn += 1
-				rgn -= 1
+				history.append([['gn',lamesa.cnt_gn], destiny_h, action, promoting, piece_respawn])
+				lamesa.lista_gn[lamesa.cnt_gn] = destiny
+				lamesa.cnt_gn += 1
+				lamesa.rgn -= 1
 			else:
-				history.append([['gb',cnt_gb], destiny, action, promoting, piece_respawn])
-				lista_gb[cnt_gb] = destiny
-				cnt_gb += 1
-				rgb -= 1
+				history.append([['gb',lamesa.cnt_gb], destiny_h, action, promoting, piece_respawn])
+				lamesa.lista_gb[lamesa.cnt_gb] = destiny
+				lamesa.cnt_gb += 1
+				lamesa.rgb -= 1
 		if kind == 'R':
 			if player == 'n':
-				history.append([['tn',cnt_tn], destiny, action, promoting, piece_respawn])
-				lista_tn[cnt_tn] = destiny
-				cnt_tn += 1
-				rtn -= 1
+				history.append([['tn',lamesa.cnt_tn], destiny_h, action, promoting, piece_respawn])
+				lamesa.lista_tn[lamesa.cnt_tn] = destiny
+				lamesa.cnt_tn += 1
+				lamesa.rtn -= 1
 			else:
-				history.append([['tb',cnt_tb], destiny, action, promoting, piece_respawn])
-				lista_tb[cnt_tb] = destiny
-				cnt_tb += 1
-				rtb -= 1
+				history.append([['tb',lamesa.cnt_tb], destiny_h, action, promoting, piece_respawn])
+				lamesa.lista_tb[lamesa.cnt_tb] = destiny
+				lamesa.cnt_tb += 1
+				lamesa.rtb -= 1
 		if kind == 'B':
 			if player == 'n':
-				history.append([['bn',cnt_bn], destiny, action, promoting, piece_respawn])
-				lista_bn[cnt_bn] = destiny
-				cnt_bn += 1
-				rbn -= 1
+				history.append([['bn',lamesa.cnt_bn], destiny_h, action, promoting, piece_respawn])
+				lamesa.lista_bn[lamesa.cnt_bn] = destiny
+				lamesa.cnt_bn += 1
+				lamesa.rbn -= 1
 			else:
-				history.append([['bb',cnt_bb], destiny, action, promoting, piece_respawn])
-				lista_bb[cnt_bb] = destiny
-				cnt_bb += 1
-				rbb -= 1
+				history.append([['bb',lamesa.cnt_bb], destiny_h, action, promoting, piece_respawn])
+				lamesa.lista_bb[lamesa.cnt_bb] = destiny
+				lamesa.cnt_bb += 1
+				lamesa.rbb -= 1
 
 	#Loading progress
 	#print len(history)
 
 # *** sprites ***
-pawn_probe = pygame.image.load("ShogiSprites/Peon.png")
-pn_img = pygame.transform.scale(pawn_probe, (70,70))
-pb_img = pygame.transform.rotozoom(pn_img, 180, 1)
-
-spawn_probe = pygame.image.load("ShogiSprites/SPeon.png")
-spn_img = pygame.transform.scale(spawn_probe, (70,70))
-spb_img = pygame.transform.rotozoom(spn_img, 180, 1)
-
-lance_probe = pygame.image.load("ShogiSprites/Lanza.png")
-ln_img = pygame.transform.scale(lance_probe, (70,70))
-lb_img = pygame.transform.rotozoom(ln_img, 180, 1)
-
-slance_probe = pygame.image.load("ShogiSprites/SLanza.png")
-sln_img = pygame.transform.scale(slance_probe, (70,70))
-slb_img = pygame.transform.rotozoom(sln_img, 180, 1)
-
-knight_probe = pygame.image.load("ShogiSprites/Caballo.png")
-nn_img = pygame.transform.scale(knight_probe, (70,70))
-nb_img = pygame.transform.rotozoom(nn_img, 180, 1)
-
-sknight_probe = pygame.image.load("ShogiSprites/SCaballo.png")
-snn_img = pygame.transform.scale(sknight_probe, (70,70))
-snb_img = pygame.transform.rotozoom(snn_img, 180, 1)
-
-silver_probe = pygame.image.load("ShogiSprites/Plata.png")
-sn_img = pygame.transform.scale(silver_probe, (70,70))
-sb_img = pygame.transform.rotozoom(sn_img, 180, 1)
-
-ssilver_probe = pygame.image.load("ShogiSprites/SPlata.png")
-ssn_img = pygame.transform.scale(ssilver_probe, (70,70))
-ssb_img = pygame.transform.rotozoom(ssn_img, 180, 1)
-
-gold_probe = pygame.image.load("ShogiSprites/Oro.png")
-gn_img = pygame.transform.scale(gold_probe, (70,70))
-gb_img = pygame.transform.rotozoom(gn_img, 180, 1)
-
-tower_probe = pygame.image.load("ShogiSprites/Torre.png")
-tn_img = pygame.transform.scale(tower_probe, (70,70))
-tb_img = pygame.transform.rotozoom(tn_img, 180, 1)
-
-stower_probe = pygame.image.load("ShogiSprites/STorre.png")
-stn_img = pygame.transform.scale(stower_probe, (70,70))
-stb_img = pygame.transform.rotozoom(stn_img, 180, 1)
-
-bishop_probe = pygame.image.load("ShogiSprites/Alfil.png")
-bn_img = pygame.transform.scale(bishop_probe, (70,70))
-bb_img = pygame.transform.rotozoom(bn_img, 180, 1)
-
-sbishop_probe = pygame.image.load("ShogiSprites/SAlfil.png")
-sbn_img = pygame.transform.scale(sbishop_probe, (70,70))
-sbb_img = pygame.transform.rotozoom(sbn_img, 180, 1)
-
-kingn_probe = pygame.image.load("ShogiSprites/ReyN.png")
-kn_img = pygame.transform.scale(kingn_probe, (70,70))
-
-kingb_probe = pygame.image.load("ShogiSprites/ReyB.png")
-kb_img = pygame.transform.scale(kingb_probe, (70,70))
-kb_img = pygame.transform.rotozoom(kb_img, 180, 1)
+sprites = sprites_manager()
 
 pos = 0
 max_history = len(history)
@@ -963,25 +825,25 @@ def move_forward():
 	if history[pos][2] == 2:
 		#In this case,
 		# history[pos] structure -> [[kind_of_piece,counter_to_assign_id], destiny_coords, action, promoting, piece_respawn]
-		statem = 'lista_'+history[pos][0][0]+'['+(str)(history[pos][0][1])+']=['+(str)(history[pos][1][0])+','+(str)(history[pos][1][1])+']'
+		statem = 'lamesa.lista_'+history[pos][0][0]+'['+(str)(history[pos][0][1])+']=['+(str)(lamesa.coords_x[history[pos][1][0]])+','+(str)(lamesa.coords_y[history[pos][1][1]])+']'
 		exec statem
-		output = 'r'+history[pos][0][0]+' -= 1'
+		output = 'lamesa.r'+history[pos][0][0]+' -= 1'
 	else:
 		# Standard case,
 		# history[pos] structure -> [code_statement_to_select_piece, coords_sum, action, promoting, piece_respawn]
-		statem = history[pos][0]+'[0]+='+(str)(history[pos][1][0])
+		statem = 'lamesa.'+history[pos][0]+'[0]+='+(str)(history[pos][1][0]*lamesa.reverted)
 		exec statem
-		statem = history[pos][0]+'[1]+='+(str)(history[pos][1][1])
+		statem = 'lamesa.'+history[pos][0]+'[1]+='+(str)(history[pos][1][1]*lamesa.reverted)
 		exec statem
 		if history[pos][3] == True: #Handle piece_promotion==True
 			#TODO Simplify this task avoiding the regexp abuse
 			prueba = re.match('^.*\[(.*)\]$', history[pos][0])
-			statem = 'prueba2='+history[pos][0]
+			statem = 'prueba2=lamesa.'+history[pos][0]
 			exec statem
-			statem = 'del '+history[pos][0]
+			statem = 'del lamesa.'+history[pos][0]
 			exec statem
 			prueba4 = re.match('^.*_(.*)\[.*\]$', history[pos][0])
-			statem = 'lista_s'+prueba4.group(1)+'['+prueba.group(1)+']=['+(str)(prueba2[0])+','+(str)(prueba2[1])+']'
+			statem = 'lamesa.lista_s'+prueba4.group(1)+'['+prueba.group(1)+']=['+(str)(prueba2[0])+','+(str)(prueba2[1])+']'
 			exec statem
 	if history[pos][4] != '':#Piece captured that has to be respawn backwards
 		# TODO Avoid regexp abuse
@@ -994,9 +856,9 @@ def move_forward():
 			piece = piece[:-1]+'n'
 		else:
 			piece = piece[:-1]+'b'
-		statem = 'del '+theobj
+		statem = 'del lamesa.'+theobj
 		exec statem
-		output = 'r'+piece+' += 1'
+		output = 'lamesa.r'+piece+' += 1'
 	pos += 1
 	previous_highlight(pos)
 	return output
@@ -1009,14 +871,14 @@ def previous_highlight(cursor):
 			if history[cursor-1][3] == True:
 				frag = re.match('^lista_(.*\[.*\])$', obj)
 				obj = 'lista_s'+frag.group(1)
-			statem = 'coords='+obj
+			statem = 'coords=lamesa.'+obj
 			exec statem
-			drawcoords = [coords[0]-history[cursor-1][1][0],coords[1]-history[cursor-1][1][1]]
+			drawcoords = [coords[0]-history[cursor-1][1][0]*lamesa.reverted,coords[1]-history[cursor-1][1][1]*lamesa.reverted]
 			pygame.draw.rect(SCREEN, (255,0,0), (drawcoords[0], drawcoords[1], 70, 70))
 			drawcoords = [coords[0],coords[1]]
 			pygame.draw.rect(SCREEN, (0,255,0), (drawcoords[0], drawcoords[1], 70, 70))
 	elif cursor > 0:
-		pygame.draw.rect(SCREEN, (0,255,0), (history[cursor-1][1][0], history[cursor-1][1][1], 70, 70))
+		pygame.draw.rect(SCREEN, (0,255,0), (lamesa.coords_x[history[cursor-1][1][0]], lamesa.coords_y[history[cursor-1][1][1]], 70, 70))
 
 			
 	
@@ -1025,23 +887,23 @@ def move_back():
 	pos -= 1
 	output = ''
 	if history[pos][2] == 2:
-		statem = 'del lista_'+history[pos][0][0]+'['+(str)(history[pos][0][1])+']'
+		statem = 'del lamesa.lista_'+history[pos][0][0]+'['+(str)(history[pos][0][1])+']'
 		exec statem
-		output = 'r'+history[pos][0][0]+' += 1'
+		output = 'lamesa.r'+history[pos][0][0]+' += 1'
 	else:
 		if history[pos][3] == True:
 			#TODO Avoid regexp abuse
 			prueba = re.match('^.*\[(.*)\]$', history[pos][0])
 			prueba4 = re.match('^.*_(.*)\[.*\]$', history[pos][0])
-			statem = 'prueba2=lista_s'+prueba4.group(1)+'['+prueba.group(1)+']'
+			statem = 'prueba2=lamesa.lista_s'+prueba4.group(1)+'['+prueba.group(1)+']'
 			exec statem
-			statem = history[pos][0]+'=['+(str)(prueba2[0])+','+(str)(prueba2[1])+']'
+			statem = 'lamesa.'+history[pos][0]+'=['+(str)(prueba2[0])+','+(str)(prueba2[1])+']'
 			exec statem
-			statem = 'del lista_s'+prueba4.group(1)+'['+prueba.group(1)+']'
+			statem = 'del lamesa.lista_s'+prueba4.group(1)+'['+prueba.group(1)+']'
 			exec statem
-		statem = history[pos][0]+'[0]-='+(str)(history[pos][1][0])
+		statem = 'lamesa.'+history[pos][0]+'[0]-='+(str)(history[pos][1][0]*lamesa.reverted)
 		exec statem
-		statem = history[pos][0]+'[1]-='+(str)(history[pos][1][1])
+		statem = 'lamesa.'+history[pos][0]+'[1]-='+(str)(history[pos][1][1]*lamesa.reverted)
 		exec statem
 	if history[pos][4] != '':
 		frag = re.match('^lista_(.*)\[.*\]=\[.*,.*\]$', history[pos][4])
@@ -1052,70 +914,13 @@ def move_back():
 			piece = piece[:-1]+'n'
 		else:
 			piece = piece[:-1]+'b'
-		exec history[pos][4]
-		output = 'r'+piece+' -= 1'
+		exec 'lamesa.'+history[pos][4]
+		output = 'lamesa.r'+piece+' -= 1'
 	previous_highlight(pos)
 	return output
 
-# TODO Avoid this code duplicate (for instance, enclosing this setup in a function)
 # *** Pieces arrays *** -> restart
-lista_pn = {1:[837,447],2:[766,447],3:[695,447],4:[624,447],5:[553,447],6:[482,447],7:[411,447],8:[340,447],9:[269,447]}
-lista_spn = {}
-cnt_pn = 10
-rpn = 0
-lista_pb = {1:[837,163],2:[766,163],3:[695,163],4:[624,163],5:[553,163],6:[482,163],7:[411,163],8:[340,163],9:[269,163]}
-lista_spb = {}
-cnt_pb = 10
-rpb = 0
-lista_ln = {1:[269,589],2:[837,589]}
-lista_sln = {}
-cnt_ln = 3
-rln = 0
-lista_lb = {1:[269,21],2:[837,21]}
-lista_slb = {}
-cnt_lb = 3
-rlb = 0
-lista_nn = {1:[340,589],2:[766,589]}
-lista_snn = {}
-cnt_nn = 3
-rnn = 0
-lista_nb = {1:[340,21],2:[766,21]}
-lista_snb = {}
-cnt_nb = 3
-rnb = 0
-lista_sn = {1:[411,589],2:[695,589]}
-lista_ssn = {}
-cnt_sn = 3
-rsn = 0
-lista_sb = {1:[411,21],2:[695,21]}
-lista_ssb = {}
-cnt_sb = 3
-rsb = 0
-lista_gn = {1:[482,589],2:[624,589]}
-cnt_gn = 3
-rgn = 0
-lista_gb = {1:[482,21],2:[624,21]}
-cnt_gb = 3
-rgb = 0
-lista_tn = {1:[766,518]}
-lista_stn = {}
-cnt_tn = 2
-rtn = 0
-lista_tb = {1:[340,92]}
-lista_stb = {}
-cnt_tb = 2
-rtb = 0
-lista_bn = {1:[340,518]}
-lista_sbn = {}
-cnt_bn = 2
-rbn = 0
-lista_bb = {1:[766,92]}
-lista_sbb = {}
-cnt_bb = 2
-rbb = 0
-rey_n = [553,589]
-rey_b = [553,21]
-
+lamesa.begin()
 
 cnt_fw = 0
 cnt_bw = 0
@@ -1161,6 +966,12 @@ while True:
 	elif event.type == KEYUP and event.key == K_a:
 		hold_bw = False
 		cnt_bw = 0
+	elif event.type == KEYDOWN and event.key == K_r:
+		lamesa.revert()
+		redraw()
+		# Invert sprites
+		sprites.revert(lamesa.reverted)
+		previous_highlight(pos)
 
 #		elif event.type == MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0]:
 #			silent.play()
@@ -1171,104 +982,135 @@ while True:
 #	pygame.draw.line(SCREEN, (0,0,0), (20,20), (mx,my))
 
 	# *** Captured pieces display ***
-	for i in xrange(0, rpn):
+	res_up = {
+		'p':(25,21),
+		'l':(25,92),
+		'n':(136,92),
+		's':(25,163),
+		'g':(136,163),
+		't':(25,234),
+		'b':(116,234)
+	}
+	res_down = {
+		'p':(940,375),
+		'l':(940,446),
+		'n':(1051,446),
+		's':(940,517),
+		'g':(1051,517),
+		't':(940,588),
+		'b':(1031,588)
+	}
+	if lamesa.reverted == 1:
+		res_n = res_down
+		res_b = res_up
+	else:
+		res_b = res_down
+		res_n = res_up
+
+	for i in xrange(0, lamesa.rpn):
 		mod = i*10
-		SCREEN.blit(pn_img, (940+mod, 375))	
-	for i in xrange(0, rpb):
+		SCREEN.blit(sprites.pn_img, (res_n['p'][0]+mod, res_n['p'][1]))	
+	for i in xrange(0, lamesa.rpb):
 		mod = i*10
-		SCREEN.blit(pb_img, (25+mod, 21))	
-	for i in xrange(0, rln):
+		SCREEN.blit(sprites.pb_img, (res_b['p'][0]+mod, res_b['p'][1]))	
+	for i in xrange(0, lamesa.rln):
 		mod = i*10
-		SCREEN.blit(ln_img, (940+mod, 446))	
-	for i in xrange(0, rlb):
+		SCREEN.blit(sprites.ln_img, (res_n['l'][0]+mod, res_n['l'][1]))	
+	for i in xrange(0, lamesa.rlb):
 		mod = i*10
-		SCREEN.blit(lb_img, (25+mod, 92))	
-	for i in xrange(0, rnn):
+		SCREEN.blit(sprites.lb_img, (res_b['l'][0]+mod, res_b['l'][1]))	
+	for i in xrange(0, lamesa.rnn):
 		mod = i*10
-		SCREEN.blit(nn_img, (1051+mod, 446))	
-	for i in xrange(0, rnb):
+		SCREEN.blit(sprites.nn_img, (res_n['n'][0]+mod, res_n['n'][1]))	
+	for i in xrange(0, lamesa.rnb):
 		mod = i*10
-		SCREEN.blit(nb_img, (136+mod, 92))	
-	for i in xrange(0, rsn):
+		SCREEN.blit(sprites.nb_img, (res_b['n'][0]+mod, res_b['n'][1]))	
+	for i in xrange(0, lamesa.rsn):
 		mod = i*10
-		SCREEN.blit(sn_img, (940+mod, 517))	
-	for i in xrange(0, rsb):
+		SCREEN.blit(sprites.sn_img, (res_n['s'][0]+mod, res_n['s'][1]))	
+	for i in xrange(0, lamesa.rsb):
 		mod = i*10
-		SCREEN.blit(sb_img, (25+mod, 163))	
-	for i in xrange(0, rgn):
+		SCREEN.blit(sprites.sb_img, (res_b['s'][0]+mod, res_b['s'][1]))	
+	for i in xrange(0, lamesa.rgn):
 		mod = i*10
-		SCREEN.blit(gn_img, (1051+mod, 517))	
-	for i in xrange(0, rgb):
+		SCREEN.blit(sprites.gn_img, (res_n['g'][0]+mod, res_n['g'][1]))	
+	for i in xrange(0, lamesa.rgb):
 		mod = i*10
-		SCREEN.blit(gb_img, (136+mod, 163))	
-	for i in xrange(0, rtn):
+		SCREEN.blit(sprites.gb_img, (res_b['g'][0]+mod, res_b['g'][1]))	
+	for i in xrange(0, lamesa.rtn):
 		mod = i*10
-		SCREEN.blit(tn_img, (940+mod, 588))	
-	for i in xrange(0, rtb):
+		SCREEN.blit(sprites.tn_img, (res_n['t'][0]+mod, res_n['t'][1]))	
+	for i in xrange(0, lamesa.rtb):
 		mod = i*10
-		SCREEN.blit(tb_img, (25+mod, 234))	
-	for i in xrange(0, rbn):
+		SCREEN.blit(sprites.tb_img, (res_b['t'][0]+mod, res_b['t'][1]))	
+	for i in xrange(0, lamesa.rbn):
 		mod = i*10
-		SCREEN.blit(bn_img, (1031+mod, 588))	
-	for i in xrange(0, rbb):
+		SCREEN.blit(sprites.bn_img, (res_n['b'][0]+mod, res_n['b'][1]))	
+	for i in xrange(0, lamesa.rbb):
 		mod = i*10
-		SCREEN.blit(bb_img, (116+mod, 234))	
+		SCREEN.blit(sprites.bb_img, (res_b['b'][0]+mod, res_b['b'][1]))	
 
 	# *** This reads the current position of pieces to place them ***
-	for k, pn in lista_pn.items():
-		SCREEN.blit(pn_img, pn)
-	for k, spn in lista_spn.items():
-		SCREEN.blit(spn_img, spn)
-	for k, pb in lista_pb.items():
-		SCREEN.blit(pb_img, (pb[0]-2, pb[1]-2))
-	for k, spb in lista_spb.items():
-		SCREEN.blit(spb_img, (spb[0]-2, spb[1]-2))
-	for k, ln in lista_ln.items():
-		SCREEN.blit(ln_img, ln)
-	for k, sln in lista_sln.items():
-		SCREEN.blit(sln_img, sln)
-	for k, lb in lista_lb.items():
-		SCREEN.blit(lb_img, (lb[0]-2, lb[1]-2))
-	for k, slb in lista_slb.items():
-		SCREEN.blit(slb_img, (slb[0]-2, slb[1]-2))
-	for k, nn in lista_nn.items():
-		SCREEN.blit(nn_img, nn)
-	for k, snn in lista_snn.items():
-		SCREEN.blit(snn_img, snn)
-	for k, nb in lista_nb.items():
-		SCREEN.blit(nb_img, (nb[0]-2, nb[1]-2))
-	for k, snb in lista_snb.items():
-		SCREEN.blit(snb_img, (snb[0]-2, snb[1]-2))
-	for k, sn in lista_sn.items():
-		SCREEN.blit(sn_img, sn)
-	for k, ssn in lista_ssn.items():
-		SCREEN.blit(ssn_img, ssn)
-	for k, sb in lista_sb.items():
-		SCREEN.blit(sb_img, (sb[0]-2, sb[1]-2))
-	for k, ssb in lista_ssb.items():
-		SCREEN.blit(ssb_img, (ssb[0]-2, ssb[1]-2))
-	for k, gn in lista_gn.items():
-		SCREEN.blit(gn_img, gn)
-	for k, gb in lista_gb.items():
-		SCREEN.blit(gb_img, (gb[0]-2, gb[1]-2))
-	for k, tn in lista_tn.items():
-		SCREEN.blit(tn_img, tn)
-	for k, stn in lista_stn.items():
-		SCREEN.blit(stn_img, stn)
-	for k, tb in lista_tb.items():
-		SCREEN.blit(tb_img, (tb[0]-2, tb[1]-2))
-	for k, stb in lista_stb.items():
-		SCREEN.blit(stb_img, (stb[0]-2, stb[1]-2))
-	for k, bn in lista_bn.items():
-		SCREEN.blit(bn_img, bn)
-	for k, sbn in lista_sbn.items():
-		SCREEN.blit(sbn_img, sbn)
-	for k, bb in lista_bb.items():
-		SCREEN.blit(bb_img, (bb[0]-2, bb[1]-2))
-	for k, sbb in lista_sbb.items():
-		SCREEN.blit(sbb_img, (sbb[0]-2, sbb[1]-2))
-	SCREEN.blit(kn_img, rey_n)
-	SCREEN.blit(kb_img, (rey_b[0]-2,rey_b[1]-2))
+	if lamesa.reverted == 1:
+		comp_b = 2
+		comp_n = 0
+	else:
+		comp_n = 2
+		comp_b = 0
+	for k, pn in lamesa.lista_pn.items():
+		SCREEN.blit(sprites.pn_img, (pn[0]-comp_n, pn[1]-comp_n))
+	for k, spn in lamesa.lista_spn.items():
+		SCREEN.blit(sprites.spn_img, (spn[0]-comp_n, spn[1]-comp_n))
+	for k, pb in lamesa.lista_pb.items():
+		SCREEN.blit(sprites.pb_img, (pb[0]-comp_b, pb[1]-comp_b))
+	for k, spb in lamesa.lista_spb.items():
+		SCREEN.blit(sprites.spb_img, (spb[0]-comp_b, spb[1]-comp_b))
+	for k, ln in lamesa.lista_ln.items():
+		SCREEN.blit(sprites.ln_img, (ln[0]-comp_n, ln[1]-comp_n))
+	for k, sln in lamesa.lista_sln.items():
+		SCREEN.blit(sprites.sln_img, (sln[0]-comp_n, sln[1]-comp_n))
+	for k, lb in lamesa.lista_lb.items():
+		SCREEN.blit(sprites.lb_img, (lb[0]-comp_b, lb[1]-comp_b))
+	for k, slb in lamesa.lista_slb.items():
+		SCREEN.blit(sprites.slb_img, (slb[0]-comp_b, slb[1]-comp_b))
+	for k, nn in lamesa.lista_nn.items():
+		SCREEN.blit(sprites.nn_img, (nn[0]-comp_n, nn[1]-comp_n))
+	for k, snn in lamesa.lista_snn.items():
+		SCREEN.blit(sprites.snn_img, (snn[0]-comp_n, snn[1]-comp_n))
+	for k, nb in lamesa.lista_nb.items():
+		SCREEN.blit(sprites.nb_img, (nb[0]-comp_b, nb[1]-comp_b))
+	for k, snb in lamesa.lista_snb.items():
+		SCREEN.blit(sprites.snb_img, (snb[0]-comp_b, snb[1]-comp_b))
+	for k, sn in lamesa.lista_sn.items():
+		SCREEN.blit(sprites.sn_img, (sn[0]-comp_n, sn[1]-comp_n))
+	for k, ssn in lamesa.lista_ssn.items():
+		SCREEN.blit(sprites.ssn_img, (ssn[0]-comp_n, ssn[1]-comp_n))
+	for k, sb in lamesa.lista_sb.items():
+		SCREEN.blit(sprites.sb_img, (sb[0]-comp_b, sb[1]-comp_b))
+	for k, ssb in lamesa.lista_ssb.items():
+		SCREEN.blit(sprites.ssb_img, (ssb[0]-comp_b, ssb[1]-comp_b))
+	for k, gn in lamesa.lista_gn.items():
+		SCREEN.blit(sprites.gn_img, (gn[0]-comp_n, gn[1]-comp_n))
+	for k, gb in lamesa.lista_gb.items():
+		SCREEN.blit(sprites.gb_img, (gb[0]-comp_b, gb[1]-comp_b))
+	for k, tn in lamesa.lista_tn.items():
+		SCREEN.blit(sprites.tn_img, (tn[0]-comp_n, tn[1]-comp_n))
+	for k, stn in lamesa.lista_stn.items():
+		SCREEN.blit(sprites.stn_img, (stn[0]-comp_n, stn[1]-comp_n))
+	for k, tb in lamesa.lista_tb.items():
+		SCREEN.blit(sprites.tb_img, (tb[0]-comp_b, tb[1]-comp_b))
+	for k, stb in lamesa.lista_stb.items():
+		SCREEN.blit(sprites.stb_img, (stb[0]-comp_b, stb[1]-comp_b))
+	for k, bn in lamesa.lista_bn.items():
+		SCREEN.blit(sprites.bn_img, (bn[0]-comp_n, bn[1]-comp_n))
+	for k, sbn in lamesa.lista_sbn.items():
+		SCREEN.blit(sprites.sbn_img, (sbn[0]-comp_n, sbn[1]-comp_n))
+	for k, bb in lamesa.lista_bb.items():
+		SCREEN.blit(sprites.bb_img, (bb[0]-comp_b, bb[1]-comp_b))
+	for k, sbb in lamesa.lista_sbb.items():
+		SCREEN.blit(sprites.sbb_img, (sbb[0]-comp_b, sbb[1]-comp_b))
+	SCREEN.blit(sprites.kn_img, (lamesa.rey_n[0]-comp_n, lamesa.rey_n[1]-comp_n))
+	SCREEN.blit(sprites.kb_img, (lamesa.rey_b[0]-comp_b, lamesa.rey_b[1]-comp_b))
 
 #	reloj.tick(10)
 	pygame.display.flip()
