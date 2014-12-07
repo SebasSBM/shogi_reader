@@ -25,6 +25,7 @@
 	Control keys:
 		D -> Forward
 		A -> Backwards
+		R -> Reverse board
 
 	Open the files in "games_recorded" directory to see how it works.
 """
