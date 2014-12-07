@@ -11,7 +11,7 @@ This program goal is to read shogi games saved in plain text using Western Shogi
 
 I will slowly improve some of these things and more when I have some spare time, but any commit made by other users to improve the program is appreciated.
 
-*1* The notation reading algorythm is not flexible enough because it must be read strictly with this kind of structure -for instance like this:
+*1*- The notation reading algorythm is not flexible enough because it must be read strictly with this kind of structure -for instance like this:
 
 	  1- G-7h
 	  2- P-3d
@@ -43,7 +43,7 @@ or this:
 
 ...among other possible list structures. It would be good that the algorythm was more flexible with this, implementing several different regexps to gather the data instead of just one.
 
-*2* The program doesn't handle potential exceptions that may occurr if the game notation was incorrect.
+*2*- The program doesn't handle potential exceptions that may occurr if the game notation was incorrect.
 
   The most interesting exception to handle: for example, top-right square is 1a, and bottom-left 9i. If coords were reverted (notation rules say that black player -the first to move- must be at the top side of the board at the beginning. Reverted would mean that the first to move is at the bottom side), the algorythm doesn't detect any legal move and gets stuck. In order to correct this kind of wrong notations, I've made the script reverter.py that takes a notated game file and reverts every single coord. It would be interesting to implement revert.py's algorythm as a first step to handle an exception where no legal move is found by the computer in a line that matched the regexp that gathers the data (compiled to the variable "reg").
 
