@@ -11,7 +11,7 @@ This program goal is to read shogi games saved in plain text using Western Shogi
 
 I will slowly improve some of these things and more when I have some spare time, but any commit made by other users to improve the program is appreciated.
 
-*1*- The notation reading algorythm is not flexible enough because it must be read strictly with this kind of structure -for instance like this:
+*1*- <b>The notation reading algorythm is not flexible enough because it must be read strictly with this kind of structure -for instance like this:</b>
 
 	  1- G-7h
 	  2- P-3d
@@ -43,7 +43,27 @@ or this:
 
 ...among other possible list structures. It would be good that the algorythm was more flexible with this, implementing several different regexps to gather the data instead of just one.
 
-*2*- The program doesn't handle potential exceptions that may occurr if the game notation was incorrect.
+*2*- <b>Shogi rules are not fully implemented.</b>
+  The algorythm that processes every move looks for the movement that every kind of piece has, but it overlooks the pieces that are in the way to the target coords. So, new conditionals must be implemented to check if there are pieces in the middle that are blocking the way. And, if they are, and no other piece can make the move, an exception should be thrown telling that the notation is incorrect. In addition, it also overlooks any limitation about dropping captured pieces, then conditionals to prevent "funny" piece drops should also be implemented. And I also should implement conditionals to detect illegal checkmates- checkmating with a pawn drop. As I explain in the 3rd point, I haven't begun to prepare exception handling yet.
+
+*3*- <b>The program doesn't handle potential exceptions that may occurr if the game notation was incorrect nor other stuff.</b>
+
+  I haven't begun with exception handling routines yet, because my main priority until now was just to make this work with correct notations and to implement the basic features -captured pieces sprites, last move highlighting and the feature to reverse the board at any moment-. Now that this basic features are ready, my next task will probably be to start implementing basic exception handling. Some of the exceptions that should be created and/or handled are:
+  
+    - Making sure that the piece can perform the move without breaking any shogi rule- as explained at point 2.
+    - Exceptions for when the regexp that splits the data of a line to be processed just doesn't match.
+    - Exceptions when no legal move is detected for that line.
+    - Exceptions when the notation of a single move allows more than one piece to perform the move (ambiguity warning).
+    - Exception when you click "Cancel" in the loading game dialog box (Python throws "No such file" in this situation, but it would be cool to prepare a more clean way to handle this exception).
 
   The most interesting exception to handle: for example, top-right square is 1a, and bottom-left 9i. If coords were reverted (notation rules say that black player -the first to move- must be at the top side of the board at the beginning. Reverted would mean that the first to move is at the bottom side), the algorythm doesn't detect any legal move and gets stuck. In order to correct this kind of wrong notations, I've made the script reverter.py that takes a notated game file and reverts every single coord. It would be interesting to implement revert.py's algorythm as a first step to handle an exception where no legal move is found by the computer in a line that matched the regexp that gathers the data (compiled to the variable "reg").
+  
+  *4*- Metadata reading and processing.
 
+  Recently, I've noticed that some of the notated games that you can find over the internet (like games played at playok.com or professional games notated and uploaded to the internet) use to include some metadata, like:
+  
+    - Names of both players.
+    - Date when the game was played.
+    - Comments about the match and why did the players make the decision they made.
+    
+    ...among other stuff. It would be interesting to implement player's name gathering and comments in the first place, and, maybe, other stuff too.
