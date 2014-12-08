@@ -58,7 +58,7 @@ or this:
 
 *3*- <b>The program doesn't handle potential exceptions that may occurr if the game notation was incorrect nor other stuff.</b>
 
-  I haven't begun with exception handling routines yet, because my main priority until now was just to make this work with correct notations and to implement the basic features -captured pieces sprites, last move highlighting and the feature to reverse the board at any moment-. Now that this basic features are ready, my next task will probably be to start implementing basic exception handling. Some of the exceptions that should be created and/or handled are:
+  I haven't begun with exception handling routines yet, because my main priority until now was just to make this work with correct notations and to implement the basic features -captured pieces sprites, last move highlighting and the feature to reverse the board at any moment-. Now that these basic features are ready, my next task will probably be to start implementing basic exception handling. Some of the exceptions that should be created and/or handled are:
   
 - Making sure that the piece can perform the move without breaking any shogi rule- as explained at point 2.
 - Exceptions for when the regexp that splits the data of a line to be processed just doesn't match.
