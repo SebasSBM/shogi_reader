@@ -78,4 +78,4 @@ or this:
     
 ...among other stuff. It would be interesting to implement player's name gathering and comments in the first place, and, maybe, other stuff too.
 
-*5*- Prepare a good installation script for as many operative systems as possible.
+*5*- <b>Preparing a good installation script for as many operative systems as possible.</b>
