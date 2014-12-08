@@ -21,7 +21,7 @@ I've not made a deep research about how to make pygame games work in Windows OS,
 
 I will slowly improve some of these things and more when I have some spare time, but any commit made by other users to improve the program would be appreciated.
 
-*1*- <b>The notation reading algorythm is not flexible enough because it must be read strictly with this kind of structure -for instance like this:</b>
+*1*- <b>The notation reading algorithm is not flexible enough because it must be read strictly with this kind of structure -for instance like this:</b>
 
 	  1- G-7h
 	  2- P-3d
@@ -35,7 +35,7 @@ I use <a href="https://github.com/SebasSBM/shogi_reader/blob/master/shogi_reader
 
   So, in objects returned by match() function (for instance, called "frag"), frag.group(1) would be the turn number -this is not mandatory for counting the turns though, or it should not be I should say-; frag.group(2) would be the kind of piece moved and desambiguation coords(if included); frag.group(4) gathers if it is a normal move("-"), a capture("x") or a piece drop("*");frag.group(5) would be the rest of the notation -coords where the piece is moved to and promoting symbols if they are present.
 
-  It works perfectly to read the Western Notation, but the algorythm itself is not any flexible about how the different moves are listed. It would fail, for example, if the example above was listed like this:
+  It works perfectly to read the Western Notation, but the algorithm itself is not any flexible about how the different moves are listed. It would fail, for example, if the example above was listed like this:
 
 		G-7h
 		P-3d
@@ -51,10 +51,10 @@ or this:
 	  2- P-7f  P-4d
 	  3- P-2f  S-4b
 
-...among other possible list structures. It would be good that the algorythm was more flexible with this, implementing several different regexps to gather the data instead of just one.
+...among other possible list structures. It would be good that the algorithm was more flexible with this, implementing several different regexps to gather the data instead of just one.
 
 *2*- <b>Shogi rules are not fully implemented.</b>
-  The algorythm that processes every move looks for the movement that every kind of piece has, but it overlooks the pieces that are in the way to the target coords. So, new conditionals must be implemented to check if there are pieces in the middle that are blocking the way. And, if they are, and no other piece can make the move, an exception should be thrown telling that the notation is incorrect. In addition, it also overlooks any limitation about dropping captured pieces, then conditionals to prevent "funny" piece drops should also be implemented. And I also should implement conditionals to detect illegal checkmates- checkmating with a pawn drop. As I explain in the 3rd point, I haven't begun to prepare exception handling yet.
+  The algorithm that processes every move looks for the movement that every kind of piece has, but it overlooks the pieces that are in the way to the target coords. So, new conditionals must be implemented to check if there are pieces in the middle that are blocking the way. And, if they are, and no other piece can make the move, an exception should be thrown telling that the notation is incorrect. In addition, it also overlooks any limitation about dropping captured pieces, then conditionals to prevent "funny" piece drops should also be implemented. And I also should implement conditionals to detect illegal checkmates- checkmating with a pawn drop. As I explain in the 3rd point, I haven't begun to prepare exception handling yet.
 
 *3*- <b>The program doesn't handle potential exceptions that may occurr if the game notation was incorrect nor other stuff.</b>
 
@@ -66,7 +66,7 @@ or this:
 - Exceptions when the notation of a single move allows more than one piece to perform the move (ambiguity warning).
 - Exception when you click "Cancel" in the loading game dialog box (Python throws "No such file" in this situation, but it would be cool to prepare a more clean way to handle this exception).
 
-  The most interesting exception to handle: for example, top-right square is 1a, and bottom-left 9i. If coords were reverted (notation rules say that black player -the first to move- must be at the top side of the board at the beginning. Reverted would mean that the first to move is at the bottom side), the algorythm doesn't detect any legal move and gets stuck. In order to correct this kind of wrong notations, I've made the script reverter.py that takes a notated game file and reverts every single coord. It would be interesting to implement revert.py's algorythm as a first step to handle an exception where no legal move is found by the computer in a line that matched the regexp that gathers the data (compiled to the variable "reg").
+  The most interesting exception to handle: for example, top-right square is 1a, and bottom-left 9i. If coords were reverted (notation rules say that black player -the first to move- must be at the top side of the board at the beginning. Reverted would mean that the first to move is at the bottom side), the algorithm doesn't detect any legal move and gets stuck. In order to correct this kind of wrong notations, I've made the script reverter.py that takes a notated game file and reverts every single coord. It would be interesting to implement revert.py's algorithm as a first step to handle an exception where no legal move is found by the computer in a line that matched the regexp that gathers the data (compiled to the variable "reg").
   
 *4*- <b>Metadata reading and processing.</b>
 
