@@ -70,7 +70,7 @@ or this:
   
 *4*- <b>Metadata reading and processing.</b>
 
-  Recently, I've noticed that some of the notated games that you can find over the internet (like games played at playok.com or professional games notated and uploaded to the internet) use to include some metadata, like:
+  Recently, I've noticed that some of the notated games that you can find over the internet (like games played at <a href="http://playok.com">playok.com</a> or professional games notated and uploaded to the internet) use to include some metadata, like:
   
 - Names of both players.
 - Date when the game was played.
