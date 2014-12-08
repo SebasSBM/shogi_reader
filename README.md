@@ -10,8 +10,8 @@ This program goal is to read shogi games saved in plain text using Western Shogi
 ### REQUIREMENTS ###
 This software is made with Python and uses the Pygame library to work, so, your OS needs to have:
 
-  - Python installed (usually, Linux based OS have Python installed by default, but there may be exceptions).
-  - Pygame library installed.
+- Python installed (usually, Linux based OS have Python installed by default, but there may be exceptions).
+- Pygame library installed.
 
 For now, the main script(shogi_reader.py) must be run from the directory that contains it, or else the sprites won't be found by the script and the script won't work at all. I will prepare some global variables to wipe out this error ASAP.
 
@@ -60,22 +60,22 @@ or this:
 
   I haven't begun with exception handling routines yet, because my main priority until now was just to make this work with correct notations and to implement the basic features -captured pieces sprites, last move highlighting and the feature to reverse the board at any moment-. Now that this basic features are ready, my next task will probably be to start implementing basic exception handling. Some of the exceptions that should be created and/or handled are:
   
-    - Making sure that the piece can perform the move without breaking any shogi rule- as explained at point 2.
-    - Exceptions for when the regexp that splits the data of a line to be processed just doesn't match.
-    - Exceptions when no legal move is detected for that line.
-    - Exceptions when the notation of a single move allows more than one piece to perform the move (ambiguity warning).
-    - Exception when you click "Cancel" in the loading game dialog box (Python throws "No such file" in this situation, but it would be cool to prepare a more clean way to handle this exception).
+- Making sure that the piece can perform the move without breaking any shogi rule- as explained at point 2.
+- Exceptions for when the regexp that splits the data of a line to be processed just doesn't match.
+- Exceptions when no legal move is detected for that line.
+- Exceptions when the notation of a single move allows more than one piece to perform the move (ambiguity warning).
+- Exception when you click "Cancel" in the loading game dialog box (Python throws "No such file" in this situation, but it would be cool to prepare a more clean way to handle this exception).
 
   The most interesting exception to handle: for example, top-right square is 1a, and bottom-left 9i. If coords were reverted (notation rules say that black player -the first to move- must be at the top side of the board at the beginning. Reverted would mean that the first to move is at the bottom side), the algorythm doesn't detect any legal move and gets stuck. In order to correct this kind of wrong notations, I've made the script reverter.py that takes a notated game file and reverts every single coord. It would be interesting to implement revert.py's algorythm as a first step to handle an exception where no legal move is found by the computer in a line that matched the regexp that gathers the data (compiled to the variable "reg").
   
-  *4*- Metadata reading and processing.
+*4*- <b>Metadata reading and processing.</b>
 
   Recently, I've noticed that some of the notated games that you can find over the internet (like games played at playok.com or professional games notated and uploaded to the internet) use to include some metadata, like:
   
-    - Names of both players.
-    - Date when the game was played.
-    - Comments about the match and why did the players make the decision they made.
+- Names of both players.
+- Date when the game was played.
+- Comments about the match and why did the players make the decision they made.
     
-    ...among other stuff. It would be interesting to implement player's name gathering and comments in the first place, and, maybe, other stuff too.
+...among other stuff. It would be interesting to implement player's name gathering and comments in the first place, and, maybe, other stuff too.
 
-  *5*- Prepare a good installation script for as many operative systems as possible.
+*5*- Prepare a good installation script for as many operative systems as possible.
