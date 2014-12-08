@@ -19,7 +19,7 @@ I've not made a deep research about how to make pygame games work in Windows OS,
 
 ### SOME THINGS THAT NEED IMPROVEMENT ###
 
-I will slowly improve some of these things and more when I have some spare time, but any commit made by other users to improve the program is appreciated.
+I will slowly improve some of these things and more when I have some spare time, but any commit made by other users to improve the program would be appreciated.
 
 *1*- <b>The notation reading algorythm is not flexible enough because it must be read strictly with this kind of structure -for instance like this:</b>
 
