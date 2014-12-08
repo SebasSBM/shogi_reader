@@ -33,7 +33,7 @@ I will slowly improve some of these things and more when I have some spare time,
 
 I use <a href="https://github.com/SebasSBM/shogi_reader/blob/master/shogi_reader.py?ts=4#L111">this regexp</a> to gather the information to be processed: <pre><code>    reg = re.compile('^\s\*(\d+)\s\*-\s\*(\+?\[P|L|N|S|G|K|R|B\](\d[a-i])?)([-|x|\*])(\d[a-i][=|\\+]?)$')</code></pre>
 
-  So, in objects returned by match() function (for instance, called "frag"), frag.group(1) would be the turn number -this is not mandatory for counting the turns though, or it should not be I should say-; frag.group(2) would be the kind of piece moved and desambiguation coords(if included); frag.group(3) gathers if it is a normal move("-"), a capture("x") or a piece drop("*");frag.group(4) would be the rest of the notation -coords where the piece is moved to and promoting symbols if they are present.
+  So, in objects returned by match() function (for instance, called "frag"), frag.group(1) would be the turn number -this is not mandatory for counting the turns though, or it should not be I should say-; frag.group(2) would be the kind of piece moved and desambiguation coords(if included); frag.group(4) gathers if it is a normal move("-"), a capture("x") or a piece drop("*");frag.group(5) would be the rest of the notation -coords where the piece is moved to and promoting symbols if they are present.
 
   It works perfectly to read the Western Notation, but the algorythm itself is not any flexible about how the different moves are listed. It would fail, for example, if the example above was listed like this:
 
