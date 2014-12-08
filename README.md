@@ -5,7 +5,17 @@ Script that uses pygame to convert Shogi Western Notation into easily-replayable
 
 ### ABOUT ShogiReader ###
 
-This program goal is to read shogi games saved in plain text using Western Shogi Game Notation (see http://japanesechess.org/notation/shogi_notation.html for more details) and use that information to replay every move forwards and backwards. It is a prototype, but it works. You switch to the next move pressing D, and to the previous pressing A. Now you can also rotate the board 180º pressing R key. 
+This program goal is to read shogi games saved in plain text using Western Shogi Game Notation (see http://japanesechess.org/notation/shogi_notation.html for more details) and use that information to replay every move forwards and backwards. It is a prototype, but it works. You switch to the next move pressing D, and to the previous pressing A. Now you can also rotate the board 180º pressing R key.
+
+### REQUIREMENTS ###
+This software is made with Python and uses the Pygame library to work, so, your OS needs to have:
+
+  - Python installed (usually, Linux based OS have Python installed by default, but there may be exceptions).
+  - Pygame library installed.
+
+For now, the main script(shogi_reader.py) must be run from the directory that contains it, or else the sprites won't be found by the script and the script won't work at all. I will prepare some global variables to wipe out this error ASAP.
+
+I've not made a deep research about how to make pygame games work in Windows OS, but I know it is possible. Late or soon, I will implement good installation tools to make this software easy to install in Windows, Linux and MacOS.
 
 ### SOME THINGS THAT NEED IMPROVEMENT ###
 
@@ -67,3 +77,5 @@ or this:
     - Comments about the match and why did the players make the decision they made.
     
     ...among other stuff. It would be interesting to implement player's name gathering and comments in the first place, and, maybe, other stuff too.
+
+  *5*- Prepare a good installation script for as many operative systems as possible.
