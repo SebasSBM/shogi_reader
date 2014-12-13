@@ -432,3 +432,105 @@ class sprites_manager:
 
 			self.kn_img = pygame.transform.scale(self.kingn_probe, (70,70))
 			self.kn_img = pygame.transform.rotozoom(self.kn_img, 180, 1)
+
+class matrix_manager:
+	def __init__(self):
+		self.ADAPTX = {'9':0,'8':1,'7':2,'6':3,'5':4,'4':5,'3':6,'2':7,'1':8}
+		self.ADAPTY = {'a':0,'b':1,'c':2,'d':3,'e':4,'f':5,'g':6,'h':7,'i':8}
+		self.coords_hx = {
+			837:'1',
+			766:'2',
+			695:'3',
+			624:'4',
+			553:'5',
+			482:'6',
+			411:'7',
+			340:'8',
+			269:'9'
+		}
+		self.coords_hy = {
+			589:'i',
+			518:'h',
+			447:'g',
+			376:'f',
+			305:'e',
+			234:'d',
+			163:'c',
+			92:'b',
+			21:'a'
+		}
+		# X es el 1er índice
+		self.matrix = [
+				[1,1,1,1,1,1,1,1,1],
+				[0,1,0,0,0,0,0,1,0],
+				[1,1,1,1,1,1,1,1,1],
+				[0,0,0,0,0,0,0,0,0],
+				[0,0,0,0,0,0,0,0,0],
+				[0,0,0,0,0,0,0,0,0],
+				[1,1,1,1,1,1,1,1,1],
+				[0,1,0,0,0,0,0,1,0],
+				[1,1,1,1,1,1,1,1,1]
+		]
+	def empty(self, coords_h):
+		self.matrix[self.ADAPTY[coords_h[1]]][self.ADAPTX[coords_h[0]]] = False
+
+	def fill(self, coords_h):
+		self.matrix[self.ADAPTY[coords_h[1]]][self.ADAPTX[coords_h[0]]] = True
+
+	def get_hcoords(self, coords):
+		return str(self.coords_hx[coords[0]])+str(self.coords_hy[coords[1]])
+
+	def check_ln(self, h_begin, h_destiny):
+		cursorx = self.ADAPTX[h_begin[0]]
+		cursory = self.ADAPTY[h_begin[1]]
+		while cursory != self.ADAPTY[h_destiny[1]]+1:
+			cursory -= 1
+			if self.matrix[cursory][cursorx] == True:
+				return False
+		return True
+
+	def check_lb(self, h_begin, h_destiny):
+		cursorx = self.ADAPTX[h_begin[0]]
+		cursory = self.ADAPTY[h_begin[1]]
+		while cursory != self.ADAPTY[h_destiny[1]]-1:
+			cursory += 1
+			if self.matrix[cursory][cursorx] == True:
+				return False
+		return True
+
+	def check_t(self, h_begin, h_destiny):
+		cursorx = self.ADAPTX[h_begin[0]]
+		cursory = self.ADAPTY[h_begin[1]]
+		destx = self.ADAPTX[h_destiny[0]]
+		desty = self.ADAPTY[h_destiny[1]]
+
+		if cursorx == destx:
+			mod = 1 if cursory < desty else -1
+			while cursory != desty - mod:
+				cursory += mod
+				if self.matrix[cursory][cursorx] == True:
+					return False
+			return True
+		else:
+			mod = 1 if cursorx < destx else -1
+			while cursorx != destx - mod:
+				cursorx += mod
+				if self.matrix[cursory][cursorx] == True:
+					return False
+			return True
+
+	def check_b(self, h_begin, h_destiny):
+		cursorx = self.ADAPTX[h_begin[0]]
+		cursory = self.ADAPTY[h_begin[1]]
+		destx = self.ADAPTX[h_destiny[0]]
+		desty = self.ADAPTY[h_destiny[1]]
+
+		modx = 1 if cursorx < destx else -1
+		mody = 1 if cursory < desty else -1
+
+		while (cursorx != destx - modx) or (cursory != desty - mody):
+			cursorx += modx
+			cursory += mody
+			if self.matrix[cursory][cursorx] == True:
+				return False
+		return True

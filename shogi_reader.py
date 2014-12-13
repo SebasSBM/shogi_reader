@@ -91,6 +91,7 @@ redraw()
 
 # *** POSITIONS TABLE and Pieces arrays ***
 lamesa = coords_manager()
+matrix = matrix_manager()
 
 # *** Motion log array ***
 history = []
@@ -110,6 +111,7 @@ partida.close()
 
 reg = re.compile('^\s*(\d+)\s*-\s*(\+?[P|L|N|S|G|K|R|B](\d[a-i])?)([-|x|*])(\d[a-i][=|\+]?)$')
 for e in movs:
+	print e
 	kind = ''
 	action = None
 	promoting = False
@@ -385,7 +387,9 @@ for e in movs:
 				for k, pn in lamesa.lista_pn.items():
 					if destiny[0] == pn[0] and destiny[1] == pn[1]-71:
 						history.append(['lista_pn['+(str)(k)+']',[0,-71], action, promoting, piece_respawn])
+						matrix.empty(matrix.get_hcoords(lamesa.lista_pn[k]))
 						lamesa.lista_pn[k] = destiny
+						matrix.fill(destiny_h)
 						if promoting == True:
 							del lamesa.lista_pn[k]
 							lamesa.lista_spn[k] = destiny
@@ -393,17 +397,22 @@ for e in movs:
 			if kind == 'L':
 				for k, ln in lamesa.lista_ln.items():
 					if destiny[0] == ln[0] and destiny[1] < ln[1]:
-						history.append(['lista_ln['+(str)(k)+']',[0,destiny[1]-ln[1]], action, promoting, piece_respawn])
-						lamesa.lista_ln[k] = destiny
-						if promoting == True:
-							del lamesa.lista_ln[k]
-							lamesa.lista_sln[k] = destiny
-						break
+						if matrix.check_ln(matrix.get_hcoords(ln),destiny_h) == True:
+							history.append(['lista_ln['+(str)(k)+']',[0,destiny[1]-ln[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_ln[k]))
+							lamesa.lista_ln[k] = destiny
+							matrix.fill(destiny_h)
+							if promoting == True:
+								del lamesa.lista_ln[k]
+								lamesa.lista_sln[k] = destiny
+							break
 			if kind == 'N':
 				for k, nn in lamesa.lista_nn.items():
 					if (destiny[0] == nn[0]+71 or destiny[0] == nn[0]-71 ) and destiny[1] == nn[1]-142:
 						history.append(['lista_nn['+(str)(k)+']',[destiny[0]-nn[0],destiny[1]-nn[1]], action, promoting, piece_respawn])
+						matrix.empty(matrix.get_hcoords(lamesa.lista_nn[k]))
 						lamesa.lista_nn[k] = destiny
+						matrix.fill(destiny_h)
 						if promoting == True:
 							del lamesa.lista_nn[k]
 							lamesa.lista_snn[k] = destiny
@@ -412,7 +421,9 @@ for e in movs:
 				for k, sn in lamesa.lista_sn.items():
 					if (destiny[0] <= sn[0]+71 and destiny[0] >= sn[0]-71 and destiny[1] == sn[1]-71) or ((destiny[0] == sn[0]+71 or destiny[0] == sn[0]-71) and destiny[1] == sn[1]+71):
 						history.append(['lista_sn['+(str)(k)+']',[destiny[0]-sn[0],destiny[1]-sn[1]], action, promoting, piece_respawn])
+						matrix.empty(matrix.get_hcoords(lamesa.lista_sn[k]))
 						lamesa.lista_sn[k] = destiny
+						matrix.fill(destiny_h)
 						if promoting == True:
 							del lamesa.lista_sn[k]
 							lamesa.lista_ssn[k] = destiny
@@ -421,56 +432,76 @@ for e in movs:
 				for k, gn in lamesa.lista_gn.items():
 					if (destiny[0] <= gn[0]+71 and destiny[0] >= gn[0]-71 and destiny[1] == gn[1]-71) or ((destiny[0] == gn[0]+71 or destiny[0] == gn[0]-71) and destiny[1] == gn[1]) or (destiny[0] == gn[0] and destiny[1] == gn[1]+71):
 						history.append(['lista_gn['+(str)(k)+']',[destiny[0]-gn[0],destiny[1]-gn[1]], action, promoting, piece_respawn])
+						matrix.empty(matrix.get_hcoords(lamesa.lista_gn[k]))
 						lamesa.lista_gn[k] = destiny
+						matrix.fill(destiny_h)
 						break
 			if kind == '+P' or kind == '+L' or kind == '+N' or kind == '+S':
 				mem = kind[1].lower()
 				statem = 'for k, j in lamesa.lista_s'+mem+'n.items():\n\t'
 				statem+= 'if (destiny[0] <= j[0]+71 and destiny[0] >= j[0]-71 and destiny[1] == j[1]-71) or ((destiny[0] == j[0]+71 or destiny[0] == j[0]-71) and destiny[1] == j[1]) or (destiny[0] == j[0] and destiny[1] == j[1]+71):\n\t\t'
 				statem+= 'history.append(["lista_s'+mem+'n["+(str)(k)+"]",[destiny[0]-j[0],destiny[1]-j[1]],'+(str)(action)+','+(str)(promoting)+',\''+piece_respawn+'\'])\n\t\t'
+				statem+= 'matrix.empty(matrix.get_hcoords(lamesa.lista_s'+mem+'n[k]))\n\t\t'
 				statem+= 'lamesa.lista_s'+mem+'n[k] = destiny\n\t\t'
+				statem+= 'matrix.fill(destiny_h)\n\t\t'
 				statem+= 'break'
 				exec statem
 			if kind == 'R':
 				for k, tn in lamesa.lista_tn.items():
 					if (destiny[0] == tn[0]) != (destiny[1] == tn[1]):
-						history.append(['lista_tn['+(str)(k)+']',[destiny[0]-tn[0],destiny[1]-tn[1]], action, promoting, piece_respawn])
-						lamesa.lista_tn[k] = destiny
-						if promoting == True:
-							del lamesa.lista_tn[k]
-							lamesa.lista_stn[k] = destiny
-						break
+						if matrix.check_t(matrix.get_hcoords(tn),destiny_h) == True:
+							history.append(['lista_tn['+(str)(k)+']',[destiny[0]-tn[0],destiny[1]-tn[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_tn[k]))
+							lamesa.lista_tn[k] = destiny
+							matrix.fill(destiny_h)
+							if promoting == True:
+								del lamesa.lista_tn[k]
+								lamesa.lista_stn[k] = destiny
+							break
 			if kind == '+R':
 				for k, stn in lamesa.lista_stn.items():
 					if ((destiny[0] == stn[0]) != (destiny[1] == stn[1])) or (destiny[0] <= stn[0]+71 and destiny[0] >= stn[0]-71 and destiny[1] <= stn[1]+71 and destiny[1] >= stn[1]-71):
-						history.append(['lista_stn['+(str)(k)+']',[destiny[0]-stn[0],destiny[1]-stn[1]], action, promoting, piece_respawn])
-						lamesa.lista_stn[k] = destiny
-						break
+						if ((destiny[0] == stn[0]) != (destiny[1] == stn[1]) and matrix.check_t(matrix.get_hcoords(stn),destiny_h) == True) or not((destiny[0] == stn[0]) != (destiny[1] == stn[1])):
+							history.append(['lista_stn['+(str)(k)+']',[destiny[0]-stn[0],destiny[1]-stn[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_stn[k]))
+							lamesa.lista_stn[k] = destiny
+							matrix.fill(destiny_h)
+							break
 			if kind == 'B':
 				for k, bn in lamesa.lista_bn.items():
 					if abs(destiny[0]-bn[0]) == abs(destiny[1]-bn[1]):
-						history.append(['lista_bn['+(str)(k)+']',[destiny[0]-bn[0],destiny[1]-bn[1]], action, promoting, piece_respawn])
-						lamesa.lista_bn[k] = destiny
-						if promoting == True:
-							del lamesa.lista_bn[k]
-							lamesa.lista_sbn[k] = destiny
-						break
+						if matrix.check_b(matrix.get_hcoords(bn),destiny_h) == True:
+							history.append(['lista_bn['+(str)(k)+']',[destiny[0]-bn[0],destiny[1]-bn[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_bn[k]))
+							lamesa.lista_bn[k] = destiny
+							matrix.fill(destiny_h)
+							if promoting == True:
+								del lamesa.lista_bn[k]
+								lamesa.lista_sbn[k] = destiny
+							break
 			if kind == '+B':
 				for k, sbn in lamesa.lista_sbn.items():
 					if (abs(destiny[0]-sbn[0]) == abs(destiny[1]-sbn[1])) or (destiny[0] <= sbn[0]+71 and destiny[0] >= sbn[0]-71 and destiny[1] <= sbn[1]+71 and destiny[1] >= sbn[1]-71):
-						history.append(['lista_sbn['+(str)(k)+']',[destiny[0]-sbn[0],destiny[1]-sbn[1]], action, promoting, piece_respawn])
-						lamesa.lista_sbn[k] = destiny
-						break
+						if ((abs(destiny[0]-sbn[0]) == abs(destiny[1]-sbn[1])) and matrix.check_b(matrix.get_hcoords(sbn),destiny_h) == True) or not(abs(destiny[0]-sbn[0]) == abs(destiny[1]-sbn[1])):
+							history.append(['lista_sbn['+(str)(k)+']',[destiny[0]-sbn[0],destiny[1]-sbn[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_sbn[k]))
+							lamesa.lista_sbn[k] = destiny
+							matrix.fill(destiny_h)
+							break
 			if kind == 'K':
 				if destiny[0] <= lamesa.rey_n[0]+71 and destiny[0] >= lamesa.rey_n[0]-71 and destiny[1] <= lamesa.rey_n[1]+71 and destiny[1] >= lamesa.rey_n[1]-71:
 					history.append(['rey_n',[destiny[0]-lamesa.rey_n[0],destiny[1]-lamesa.rey_n[1]], action, promoting, piece_respawn])
+					matrix.empty(matrix.get_hcoords(lamesa.rey_n))
 					lamesa.rey_n = destiny
+					matrix.fill(destiny_h)
 		else: #Blancas
 			if kind == 'P':
 				for k, pb in lamesa.lista_pb.items():
 					if destiny[0] == pb[0] and destiny[1] == pb[1]+71:
 						history.append(['lista_pb['+(str)(k)+']',[0, 71], action, promoting, piece_respawn])
+						matrix.empty(matrix.get_hcoords(lamesa.lista_pb[k]))
 						lamesa.lista_pb[k] = destiny
+						matrix.fill(destiny_h)
 						if promoting == True:
 							del lamesa.lista_pb[k]
 							lamesa.lista_spb[k] = destiny
@@ -478,17 +509,22 @@ for e in movs:
 			if kind == 'L':
 				for k, lb in lamesa.lista_lb.items():
 					if destiny[0] == lb[0] and destiny[1] > lb[1]:
-						history.append(['lista_lb['+(str)(k)+']',[0,destiny[1]-lb[1]], action, promoting, piece_respawn])
-						lamesa.lista_lb[k] = destiny
-						if promoting == True:
-							del lamesa.lista_lb[k]
-							lamesa.lista_slb[k] = destiny
-						break
+						if matrix.check_lb(matrix.get_hcoords(lb),destiny_h) == True:
+							history.append(['lista_lb['+(str)(k)+']',[0,destiny[1]-lb[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_lb[k]))
+							lamesa.lista_lb[k] = destiny
+							matrix.fill(destiny_h)
+							if promoting == True:
+								del lamesa.lista_lb[k]
+								lamesa.lista_slb[k] = destiny
+							break
 			if kind == 'N':
 				for k, nb in lamesa.lista_nb.items():
 					if (destiny[0] == nb[0]+71 or destiny[0] == nb[0]-71 ) and destiny[1] == nb[1]+142:
 						history.append(['lista_nb['+(str)(k)+']',[destiny[0]-nb[0],destiny[1]-nb[1]], action, promoting, piece_respawn])
+						matrix.empty(matrix.get_hcoords(lamesa.lista_nb[k]))
 						lamesa.lista_nb[k] = destiny
+						matrix.fill(destiny_h)
 						if promoting == True:
 							del lamesa.lista_nb[k]
 							lamesa.lista_snb[k] = destiny
@@ -497,7 +533,9 @@ for e in movs:
 				for k, sb in lamesa.lista_sb.items():
 					if (destiny[0] <= sb[0]+71 and destiny[0] >= sb[0]-71 and destiny[1] == sb[1]+71) or ((destiny[0] == sb[0]+71 or destiny[0] == sb[0]-71) and destiny[1] == sb[1]-71):
 						history.append(['lista_sb['+(str)(k)+']',[destiny[0]-sb[0],destiny[1]-sb[1]], action, promoting, piece_respawn])
+						matrix.empty(matrix.get_hcoords(lamesa.lista_sb[k]))
 						lamesa.lista_sb[k] = destiny
+						matrix.fill(destiny_h)
 						if promoting == True:
 							del lamesa.lista_sb[k]
 							lamesa.lista_ssb[k] = destiny
@@ -506,57 +544,77 @@ for e in movs:
 				for k, gb in lamesa.lista_gb.items():
 					if (destiny[0] <= gb[0]+71 and destiny[0] >= gb[0]-71 and destiny[1] == gb[1]+71) or ((destiny[0] == gb[0]+71 or destiny[0] == gb[0]-71) and destiny[1] == gb[1]) or (destiny[0] == gb[0] and destiny[1] == gb[1]-71):
 						history.append(['lista_gb['+(str)(k)+']',[destiny[0]-gb[0],destiny[1]-gb[1]], action, promoting, piece_respawn])
+						matrix.empty(matrix.get_hcoords(lamesa.lista_gb[k]))
 						lamesa.lista_gb[k] = destiny
+						matrix.fill(destiny_h)
 						break
 			if kind == '+P' or kind == '+L' or kind == '+N' or kind == '+S':
 				mem = kind[1].lower()
 				statem = 'for k, j in lamesa.lista_s'+mem+'b.items():\n\t'
 				statem+= 'if (destiny[0] <= j[0]+71 and destiny[0] >= j[0]-71 and destiny[1] == j[1]+71) or ((destiny[0] == j[0]+71 or destiny[0] == j[0]-71) and destiny[1] == j[1]) or (destiny[0] == j[0] and destiny[1] == j[1]-71):\n\t\t'
 				statem+= 'history.append(["lista_s'+mem+'b["+(str)(k)+"]",[destiny[0]-j[0],destiny[1]-j[1]],'+(str)(action)+','+(str)(promoting)+',\''+piece_respawn+'\'])\n\t\t'
+				statem+= 'matrix.empty(matrix.get_hcoords(lamesa.lista_s'+mem+'b[k]))\n\t\t'
 				statem+= 'lamesa.lista_s'+mem+'b[k] = destiny\n\t\t'
+				statem+= 'matrix.fill(destiny_h)\n\t\t'
 				statem+= 'break'
 				exec statem
 			if kind == 'R':
 				for k, tb in lamesa.lista_tb.items():
 					if (destiny[0] == tb[0]) != (destiny[1] == tb[1]):
-						history.append(['lista_tb['+(str)(k)+']',[destiny[0]-tb[0],destiny[1]-tb[1]], action, promoting, piece_respawn])
-						lamesa.lista_tb[k] = destiny
-						if promoting == True:
-							del lamesa.lista_tb[k]
-							lamesa.lista_stb[k] = destiny
-						break
+						if matrix.check_t(matrix.get_hcoords(tb),destiny_h) == True:
+							history.append(['lista_tb['+(str)(k)+']',[destiny[0]-tb[0],destiny[1]-tb[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_tb[k]))
+							lamesa.lista_tb[k] = destiny
+							matrix.fill(destiny_h)
+							if promoting == True:
+								del lamesa.lista_tb[k]
+								lamesa.lista_stb[k] = destiny
+							break
 			if kind == '+R':
 				for k, stb in lamesa.lista_stb.items():
 					if ((destiny[0] == stb[0]) != (destiny[1] == stb[1])) or (destiny[0] <= stb[0]+71 and destiny[0] >= stb[0]-71 and destiny[1] <= stb[1]+71 and destiny[1] >= stb[1]-71):
-						history.append(['lista_stb['+(str)(k)+']',[destiny[0]-stb[0],destiny[1]-stb[1]], action, promoting, piece_respawn])
-						lamesa.lista_stb[k] = destiny
-						break
+						if ((destiny[0] == stb[0]) != (destiny[1] == stb[1]) and matrix.check_t(matrix.get_hcoords(stb),destiny_h) == True) or not((destiny[0] == stb[0]) != (destiny[1] == stb[1])):
+							history.append(['lista_stb['+(str)(k)+']',[destiny[0]-stb[0],destiny[1]-stb[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_stb[k]))
+							lamesa.lista_stb[k] = destiny
+							matrix.fill(destiny_h)
+							break
 			if kind == 'B':
 				for k, bb in lamesa.lista_bb.items():
 					if abs(destiny[0]-bb[0]) == abs(destiny[1]-bb[1]):
-						history.append(['lista_bb['+(str)(k)+']',[destiny[0]-bb[0],destiny[1]-bb[1]], action, promoting, piece_respawn])
-						lamesa.lista_bb[k] = destiny
-						if promoting == True:
-							del lamesa.lista_bb[k]
-							lamesa.lista_sbb[k] = destiny
-						break
+						if matrix.check_b(matrix.get_hcoords(bb),destiny_h) == True:
+							history.append(['lista_bb['+(str)(k)+']',[destiny[0]-bb[0],destiny[1]-bb[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_bb[k]))
+							lamesa.lista_bb[k] = destiny
+							matrix.fill(destiny_h)
+							if promoting == True:
+								del lamesa.lista_bb[k]
+								lamesa.lista_sbb[k] = destiny
+							break
 			if kind == '+B':
 				for k, sbb in lamesa.lista_sbb.items():
 					if (abs(destiny[0]-sbb[0]) == abs(destiny[1]-sbb[1])) or (destiny[0] <= sbb[0]+71 and destiny[0] >= sbb[0]-71 and destiny[1] <= sbb[1]+71 and destiny[1] >= sbb[1]-71):
-						history.append(['lista_sbb['+(str)(k)+']',[destiny[0]-sbb[0],destiny[1]-sbb[1]], action, promoting, piece_respawn])
-						lamesa.lista_sbb[k] = destiny
-						break
+						if ((abs(destiny[0]-sbb[0]) == abs(destiny[1]-sbb[1])) and matrix.check_b(matrix.get_hcoords(sbb),destiny_h) == True) or not(abs(destiny[0]-sbb[0]) == abs(destiny[1]-sbb[1])):
+							history.append(['lista_sbb['+(str)(k)+']',[destiny[0]-sbb[0],destiny[1]-sbb[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_sbb[k]))
+							lamesa.lista_sbb[k] = destiny
+							matrix.fill(destiny_h)
+							break
 			if kind == 'K':
 				if destiny[0] <= lamesa.rey_b[0]+71 and destiny[0] >= lamesa.rey_b[0]-71 and destiny[1] <= lamesa.rey_b[1]+71 and destiny[1] >= lamesa.rey_b[1]-71:
 					history.append(['rey_b',[destiny[0]-lamesa.rey_b[0],destiny[1]-lamesa.rey_b[1]], action, promoting, piece_respawn])
+					matrix.empty(matrix.get_hcoords(lamesa.rey_b))
 					lamesa.rey_b = destiny
+					matrix.fill(destiny_h)
 	elif action != 2:
 		if int(frag.group(1)) % 2 == 1: #Negras
 			if kind == 'P':
 				for k, pn in lamesa.lista_pn.items():
 					if pn[0] == piece_x and pn[1] == piece_y:
 						history.append(['lista_pn['+(str)(k)+']',[0,-71], action, promoting, piece_respawn])
+						matrix.empty(matrix.get_hcoords(lamesa.lista_pn[k]))
 						lamesa.lista_pn[k] = destiny
+						matrix.fill(destiny_h)
 						if promoting == True:
 							del lamesa.lista_pn[k]
 							lamesa.lista_spn[k] = destiny
@@ -564,17 +622,22 @@ for e in movs:
 			if kind == 'L':
 				for k, ln in lamesa.lista_ln.items():
 					if ln[0] == piece_x and ln[1] == piece_y:
-						history.append(['lista_ln['+(str)(k)+']',[0,destiny[1]-ln[1]], action, promoting, piece_respawn])
-						lamesa.lista_ln[k] = destiny
-						if promoting == True:
-							del lamesa.lista_ln[k]
-							lamesa.lista_sln[k] = destiny
-						break
+						if matrix.check_ln(matrix.get_hcoords(ln),destiny_h) == True:
+							history.append(['lista_ln['+(str)(k)+']',[0,destiny[1]-ln[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_ln[k]))
+							lamesa.lista_ln[k] = destiny
+							matrix.fill(destiny_h)
+							if promoting == True:
+								del lamesa.lista_ln[k]
+								lamesa.lista_sln[k] = destiny
+							break
 			if kind == 'N':
 				for k, nn in lamesa.lista_nn.items():
 					if nn[0] == piece_x and nn[1] == piece_y:
 						history.append(['lista_nn['+(str)(k)+']',[destiny[0]-nn[0],destiny[1]-nn[1]], action, promoting, piece_respawn])
+						matrix.empty(matrix.get_hcoords(lamesa.lista_nn[k]))
 						lamesa.lista_nn[k] = destiny
+						matrix.fill(destiny_h)
 						if promoting == True:
 							del lamesa.lista_nn[k]
 							lamesa.lista_snn[k] = destiny
@@ -583,7 +646,9 @@ for e in movs:
 				for k, sn in lamesa.lista_sn.items():
 					if sn[0] == piece_x and sn[1] == piece_y:
 						history.append(['lista_sn['+(str)(k)+']',[destiny[0]-sn[0],destiny[1]-sn[1]], action, promoting, piece_respawn])
+						matrix.empty(matrix.get_hcoords(lamesa.lista_sn[k]))
 						lamesa.lista_sn[k] = destiny
+						matrix.fill(destiny_h)
 						if promoting == True:
 							del lamesa.lista_sn[k]
 							lamesa.lista_ssn[k] = destiny
@@ -592,56 +657,76 @@ for e in movs:
 				for k, gn in lamesa.lista_gn.items():
 					if gn[0] == piece_x and gn[1] == piece_y:
 						history.append(['lista_gn['+(str)(k)+']',[destiny[0]-gn[0],destiny[1]-gn[1]], action, promoting, piece_respawn])
+						matrix.empty(matrix.get_hcoords(lamesa.lista_gn[k]))
 						lamesa.lista_gn[k] = destiny
+						matrix.fill(destiny_h)
 						break
 			if kind == '+P' or kind == '+L' or kind == '+N' or kind == '+S':
 				mem = kind[1].lower()
 				statem = 'for k, j in lamesa.lista_s'+mem+'n.items():\n\t'
 				statem+= 'if j[0] == piece_x and j[1] == piece_y:\n\t\t'
 				statem+= 'history.append(["lista_s'+mem+'n["+(str)(k)+"]",[destiny[0]-j[0],destiny[1]-j[1]],'+(str)(action)+','+(str)(promoting)+',\''+piece_respawn+'\'])\n\t\t'
+				statem+= 'matrix.empty(matrix.get_hcoords(lamesa.lista_s'+mem+'n[k]))\n\t\t'
 				statem+= 'lamesa.lista_s'+mem+'n[k] = destiny\n\t\t'
+				statem+= 'matrix.fill(destiny_h)\n\t\t'
 				statem+= 'break'
 				exec statem
 			if kind == 'R':
 				for k, tn in lamesa.lista_tn.items():
 					if tn[0] == piece_x and tn[1] == piece_y:
-						history.append(['lista_tn['+(str)(k)+']',[destiny[0]-tn[0],destiny[1]-tn[1]], action, promoting, piece_respawn])
-						lamesa.lista_tn[k] = destiny
-						if promoting == True:
-							del lamesa.lista_tn[k]
-							lamesa.lista_stn[k] = destiny
-						break
+						if matrix.check_t(matrix.get_hcoords(tn),destiny_h) == True:
+							history.append(['lista_tn['+(str)(k)+']',[destiny[0]-tn[0],destiny[1]-tn[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_tn[k]))
+							lamesa.lista_tn[k] = destiny
+							matrix.fill(destiny_h)
+							if promoting == True:
+								del lamesa.lista_tn[k]
+								lamesa.lista_stn[k] = destiny
+							break
 			if kind == '+R':
 				for k, stn in lamesa.lista_stn.items():
 					if stn[0] == piece_x and stn[1] == piece_y:
-						history.append(['lista_stn['+(str)(k)+']',[destiny[0]-stn[0],destiny[1]-stn[1]], action, promoting, piece_respawn])
-						lamesa.lista_stn[k] = destiny
-						break
+						if ((destiny[0] == stn[0]) != (destiny[1] == stn[1]) and matrix.check_t(matrix.get_hcoords(stn),destiny_h) == True) or not((destiny[0] == stn[0]) != (destiny[1] == stn[1])):
+							history.append(['lista_stn['+(str)(k)+']',[destiny[0]-stn[0],destiny[1]-stn[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_stn[k]))
+							lamesa.lista_stn[k] = destiny
+							matrix.fill(destiny_h)
+							break
 			if kind == 'B':
 				for k, bn in lamesa.lista_bn.items():
 					if bn[0] == piece_x and bn[1] == piece_y:
-						history.append(['lista_bn['+(str)(k)+']',[destiny[0]-bn[0],destiny[1]-bn[1]], action, promoting, piece_respawn])
-						lamesa.lista_bn[k] = destiny
-						if promoting == True:
-							del lamesa.lista_bn[k]
-							lamesa.lista_sbn[k] = destiny
-						break
+						if matrix.check_b(matrix.get_hcoords(bn),destiny_h) == True:
+							history.append(['lista_bn['+(str)(k)+']',[destiny[0]-bn[0],destiny[1]-bn[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_bn[k]))
+							lamesa.lista_bn[k] = destiny
+							matrix.fill(destiny_h)
+							if promoting == True:
+								del lamesa.lista_bn[k]
+								lamesa.lista_sbn[k] = destiny
+							break
 			if kind == '+B':
 				for k, sbn in lamesa.lista_sbn.items():
 					if sbn[0] == piece_x and sbn[1] == piece_y:
-						history.append(['lista_sbn['+(str)(k)+']',[destiny[0]-sbn[0],destiny[1]-sbn[1]], action, promoting, piece_respawn])
-						lamesa.lista_sbn[k] = destiny
-						break
+						if ((abs(destiny[0]-sbn[0]) == abs(destiny[1]-sbn[1])) and matrix.check_b(matrix.get_hcoords(sbn),destiny_h) == True) or not(abs(destiny[0]-sbn[0]) == abs(destiny[1]-sbn[1])):
+							history.append(['lista_sbn['+(str)(k)+']',[destiny[0]-sbn[0],destiny[1]-sbn[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_sbn[k]))
+							lamesa.lista_sbn[k] = destiny
+							matrix.fill(destiny_h)
+							break
 			if kind == 'K':
 				if lamesa.rey_n[0] == piece_x and lamesa.rey_n[1] == piece_y:
 					history.append(['rey_n',[destiny[0]-lamesa.rey_n[0],destiny[1]-lamesa.rey_n[1]], action, promoting, piece_respawn])
+					matrix.empty(matrix.get_hcoords(lamesa.rey_n))
 					lamesa.rey_n = destiny
+					matrix.fill(destiny_h)
 		else: # Blancas
 			if kind == 'P':
 				for k, pb in lamesa.lista_pb.items():
 					if pb[0] == piece_x and pb[1] == piece_y:
 						history.append(['lista_pb['+(str)(k)+']',[0,+71], action, promoting, piece_respawn])
+						matrix.empty(matrix.get_hcoords(lamesa.lista_pb[k]))
 						lamesa.lista_pb[k] = destiny
+						matrix.fill(destiny_h)
 						if promoting == True:
 							del lamesa.lista_pb[k]
 							lamesa.lista_spb[k] = destiny
@@ -649,17 +734,22 @@ for e in movs:
 			if kind == 'L':
 				for k, lb in lamesa.lista_lb.items():
 					if lb[0] == piece_x and lb[1] == piece_y:
-						history.append(['lista_lb['+(str)(k)+']',[0,destiny[1]-lb[1]], action, promoting, piece_respawn])
-						lamesa.lista_lb[k] = destiny
-						if promoting == True:
-							del lamesa.lista_lb[k]
-							lamesa.lista_slb[k] = destiny
-						break
+						if matrix.check_lb(matrix.get_hcoords(lb),destiny_h) == True:
+							history.append(['lista_lb['+(str)(k)+']',[0,destiny[1]-lb[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_lb[k]))
+							lamesa.lista_lb[k] = destiny
+							matrix.fill(destiny_h)
+							if promoting == True:
+								del lamesa.lista_lb[k]
+								lamesa.lista_slb[k] = destiny
+							break
 			if kind == 'N':
 				for k, nb in lamesa.lista_nb.items():
 					if nb[0] == piece_x and nb[1] == piece_y:
 						history.append(['lista_nb['+(str)(k)+']',[destiny[0]-nb[0],destiny[1]-nb[1]], action, promoting, piece_respawn])
+						matrix.empty(matrix.get_hcoords(lamesa.lista_nb[k]))
 						lamesa.lista_nb[k] = destiny
+						matrix.fill(destiny_h)
 						if promoting == True:
 							del lamesa.lista_nb[k]
 							lamesa.lista_snb[k] = destiny
@@ -668,7 +758,9 @@ for e in movs:
 				for k, sb in lamesa.lista_sb.items():
 					if sb[0] == piece_x and sb[1] == piece_y:
 						history.append(['lista_sb['+(str)(k)+']',[destiny[0]-sb[0],destiny[1]-sb[1]], action, promoting, piece_respawn])
+						matrix.empty(matrix.get_hcoords(lamesa.lista_sb[k]))
 						lamesa.lista_sb[k] = destiny
+						matrix.fill(destiny_h)
 						if promoting == True:
 							del lamesa.lista_sb[k]
 							lamesa.lista_ssb[k] = destiny
@@ -677,50 +769,68 @@ for e in movs:
 				for k, gb in lamesa.lista_gb.items():
 					if gb[0] == piece_x and gb[1] == piece_y:
 						history.append(['lista_gb['+(str)(k)+']',[destiny[0]-gb[0],destiny[1]-gb[1]], action, promoting, piece_respawn])
+						matrix.empty(matrix.get_hcoords(lamesa.lista_gb[k]))
 						lamesa.lista_gb[k] = destiny
+						matrix.fill(destiny_h)
 						break
 			if kind == '+P' or kind == '+L' or kind == '+N' or kind == '+S':
 				mem = kind[1].lower()
 				statem = 'for k, j in lamesa.lista_s'+mem+'b.items():\n\t'
 				statem+= 'if j[0] == piece_x and j[1] == piece_y:\n\t\t'
 				statem+= 'history.append(["lista_s'+mem+'b["+(str)(k)+"]",[destiny[0]-j[0],destiny[1]-j[1]],'+(str)(action)+','+(str)(promoting)+',\''+piece_respawn+'\'])\n\t\t'
+				statem+= 'matrix.empty(matrix.get_hcoords(lamesa.lista_s'+mem+'b[k]))\n\t\t'
 				statem+= 'lamesa.lista_s'+mem+'b[k] = destiny\n\t\t'
+				statem+= 'matrix.fill(destiny_h)\n\t\t'
 				statem+= 'break'
 				exec statem
 			if kind == 'R':
 				for k, tb in lamesa.lista_tb.items():
 					if tb[0] == piece_x and tb[1] == piece_y:
-						history.append(['lista_tb['+(str)(k)+']',[destiny[0]-tb[0],destiny[1]-tb[1]], action, promoting, piece_respawn])
-						lamesa.lista_tb[k] = destiny
-						if promoting == True:
-							del lamesa.lista_tb[k]
-							lamesa.lista_stb[k] = destiny
-						break
+						if matrix.check_t(matrix.get_hcoords(tb),destiny_h) == True:
+							history.append(['lista_tb['+(str)(k)+']',[destiny[0]-tb[0],destiny[1]-tb[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_tb[k]))
+							lamesa.lista_tb[k] = destiny
+							matrix.fill(destiny_h)
+							if promoting == True:
+								del lamesa.lista_tb[k]
+								lamesa.lista_stb[k] = destiny
+							break
 			if kind == '+R':
 				for k, stb in lamesa.lista_stb.items():
 					if stb[0] == piece_x and stb[1] == piece_y:
-						history.append(['lista_stb['+(str)(k)+']',[destiny[0]-stb[0],destiny[1]-stb[1]], action, promoting, piece_respawn])
-						lamesa.lista_stb[k] = destiny
-						break
+						if ((destiny[0] == stb[0]) != (destiny[1] == stb[1]) and matrix.check_t(matrix.get_hcoords(stb),destiny_h) == True) or not((destiny[0] == stb[0]) != (destiny[1] == stb[1])):
+							history.append(['lista_stb['+(str)(k)+']',[destiny[0]-stb[0],destiny[1]-stb[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_stb[k]))
+							lamesa.lista_stb[k] = destiny
+							matrix.fill(destiny_h)
+							break
 			if kind == 'B':
 				for k, bb in lamesa.lista_bb.items():
 					if bb[0] == piece_x and bb[1] == piece_y:
-						history.append(['lista_bb['+(str)(k)+']',[destiny[0]-bb[0],destiny[1]-bb[1]], action, promoting, piece_respawn])
-						lamesa.lista_bb[k] = destiny
-						if promoting == True:
-							del lamesa.lista_bb[k]
-							lamesa.lista_sbb[k] = destiny
-						break
+						if matrix.check_b(matrix.get_hcoords(bb),destiny_h) == True:
+							history.append(['lista_bb['+(str)(k)+']',[destiny[0]-bb[0],destiny[1]-bb[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_bb[k]))
+							lamesa.lista_bb[k] = destiny
+							matrix.fill(destiny_h)
+							if promoting == True:
+								del lamesa.lista_bb[k]
+								lamesa.lista_sbb[k] = destiny
+							break
 			if kind == '+B':
 				for k, sbb in lamesa.lista_sbb.items():
 					if sbb[0] == piece_x and sbb[1] == piece_y:
-						history.append(['lista_sbb['+(str)(k)+']',[destiny[0]-sbb[0],destiny[1]-sbb[1]], action, promoting, piece_respawn])
-						lamesa.lista_sbb[k] = destiny
-						break
+						if ((abs(destiny[0]-sbb[0]) == abs(destiny[1]-sbb[1])) and matrix.check_b(matrix.get_hcoords(sbb),destiny_h) == True) or not(abs(destiny[0]-sbb[0]) == abs(destiny[1]-sbb[1])):
+							history.append(['lista_sbb['+(str)(k)+']',[destiny[0]-sbb[0],destiny[1]-sbb[1]], action, promoting, piece_respawn])
+							matrix.empty(matrix.get_hcoords(lamesa.lista_sbb[k]))
+							lamesa.lista_sbb[k] = destiny
+							matrix.fill(destiny_h)
+							break
 			if kind == 'K':
 				if lamesa.rey_b[0] == piece_x and lamesa.rey_b[1] == piece_y:
 					history.append(['rey_b',[destiny[0]-lamesa.rey_b[0],destiny[1]-lamesa.rey_b[1]], action, promoting, piece_respawn])
+					matrix.empty(matrix.get_hcoords(lamesa.rey_b))
 					lamesa.rey_b = destiny
+					matrix.fill(destiny_h)
 	else: # Action=2 (reingreso)
 		if int(frag.group(1)) % 2 == 1: #Negras
 			player = 'n'
@@ -804,6 +914,7 @@ for e in movs:
 				lamesa.lista_bb[lamesa.cnt_bb] = destiny
 				lamesa.cnt_bb += 1
 				lamesa.rbb -= 1
+		matrix.fill(destiny_h)
 
 	#Loading progress
 	#print len(history)
@@ -922,6 +1033,7 @@ def move_back():
 
 # *** Pieces arrays *** -> restart
 lamesa.begin()
+matrix = None
 
 cnt_fw = 0
 cnt_bw = 0
