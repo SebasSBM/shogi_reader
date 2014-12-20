@@ -57,6 +57,8 @@ root = Tkinter.Tk()
 root.withdraw()
 
 file_path = tkFileDialog.askopenfilename()
+if file_path == '':
+	exit()
 partida = open(file_path, 'r')
 
 rawgame = partida.read()

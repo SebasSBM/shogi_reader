@@ -21,7 +21,7 @@
 """
 	This file contains the classes defined for shogi_reader
 """
-import pygame, re
+import pygame, re, tkMessageBox
 
 class coords_manager:
 	def __init__(self):
@@ -565,6 +565,9 @@ class input_manager:
 		reg = re.compile('(\+?[P|L|N|S|G|K|R|B](\d[a-i])?[-|x|*]\d[a-i][=|\+]?)')
 		moves = reg.findall(self.raw)
 		output = ''
+		if moves == []:
+			tkMessageBox.showerror("NO NOTATIONS FOUND", "This file doesn't contain correct shogi western notations.")
+			exit()
 		for i in xrange(0, len(moves)):
 			if output != '':
 				output += '\n'
