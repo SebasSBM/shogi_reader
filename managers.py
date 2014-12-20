@@ -21,7 +21,7 @@
 """
 	This file contains the classes defined for shogi_reader
 """
-import pygame
+import pygame, re
 
 class coords_manager:
 	def __init__(self):
@@ -534,3 +534,45 @@ class matrix_manager:
 			if self.matrix[cursory][cursorx] == True:
 				return False
 		return True
+
+class input_manager:
+	def __init__(self, input_text):
+		self.raw = input_text.replace('\n','')
+		self.movs = None
+		self.metadata = None
+		self.comments = []
+		self.sente = None
+		self.gote = None
+		self.get_metadata()
+		self.get_names()
+		self.prepare_movs()
+
+	def get_metadata(self):
+		reg = re.compile('\[[^\[\]]*\]')
+		self.metadata = reg.findall(self.raw)
+		for e in self.metadata:
+			self.raw = self.raw.replace(e, '')
+
+	def get_names(self):
+		sente = re.compile('\[([Ss]ente|[Bb]lack)[:\s][^\[\]]*"([a-zA-z0-9][^\[\]]*)"\s*\]')
+		gote = re.compile('\[([Gg]ote|[Ww]hite)[:\s][^\[\]]*"([a-zA-z0-9][^\[\]]*)"\s*\]')
+		for e in self.metadata:
+			if sente.match(e):
+				self.sente = sente.match(e).group(2)
+			elif gote.match(e):
+				self.gote = gote.match(e).group(2)
+	
+	def prepare_movs(self):
+#		game = game.translate(None, '\n')
+		reg = re.compile('(\+?[P|L|N|S|G|K|R|B](\d[a-i])?[-|x|*]\d[a-i][=|\+]?)')
+#		reg = re.compile('^\s*(\d+)\s*-\s*(\+?[P|L|N|S|G|K|R|B](\d[a-i])?)([-|x|*])(\d[a-i][=|\+]?)$')
+		moves = reg.findall(self.raw)
+		output = ''
+		for i in xrange(0, len(moves)):
+			if output != '':
+				output += '\n'
+			if str(type(moves[i])) == "<type 'tuple'>":	
+				output += str(i+1) + ' - ' +moves[i][0]
+			else:
+				output += str(i+1) + ' - ' +moves[i]
+		self.movs = output

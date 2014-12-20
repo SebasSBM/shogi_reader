@@ -1,3 +1,6 @@
+[Sente: "Hamshogi's AI"]
+[Gote: "SebasSBM"]
+
   1- G-7h
   2- P-3d
   3- P-7f

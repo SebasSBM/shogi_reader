@@ -39,7 +39,31 @@ pygame.init()
 size = width, height = 1200,760
 
 SCREEN = pygame.display.set_mode(size)
+FONT = pygame.font.SysFont("monospace", 14)
 pygame.display.set_caption("ShogiReader - Reproductor de partidas grabadas")
+
+# *** POSITIONS TABLE and Pieces arrays ***
+lamesa = coords_manager()
+matrix = matrix_manager()
+
+# *** Motion log array ***
+history = []
+
+# *** ALGORYTHM TO READ NOTATION AND TRANSFORM IT INTO DATA EXECUTABLE FORWARD AND BACKWARDS ***
+import Tkinter, tkFileDialog
+
+root = Tkinter.Tk()
+root.withdraw()
+
+file_path = tkFileDialog.askopenfilename()
+partida = open(file_path, 'r')
+
+# TODO Prepare a function here that gathers any kind of data structure
+rawgame = partida.read()
+game_data = input_manager(rawgame)
+movs = game_data.movs.splitlines()
+
+partida.close()
 
 # ******* TABLERO ********
 
@@ -50,6 +74,7 @@ b = 180
 bg = int(r), int(g), int(b)
 
 def redraw():
+#	global FONT
 	SCREEN.fill(bg)
 	pygame.draw.rect(SCREEN, (82,64,4), (20, 20, 230, 284))
 	pygame.draw.rect(SCREEN, (82,64,4), (930, 375, 230, 284))
@@ -77,6 +102,7 @@ def redraw():
 	pygame.draw.line(SCREEN, (0,0,0), (268,517), (907,517))
 	pygame.draw.line(SCREEN, (0,0,0), (268,588), (907,588))
 	pygame.draw.line(SCREEN, (0,0,0), (268,659), (907,659))
+
 redraw()
 
 ### Positions sheet
@@ -88,26 +114,6 @@ redraw()
 #
 ###
 #
-
-# *** POSITIONS TABLE and Pieces arrays ***
-lamesa = coords_manager()
-matrix = matrix_manager()
-
-# *** Motion log array ***
-history = []
-
-# *** ALGORYTHM TO READ NOTATION AND TRANSFORM IT INTO DATA EXECUTABLE FORWARD AND BACKWARDS ***
-import Tkinter, tkFileDialog
-
-root = Tkinter.Tk()
-root.withdraw()
-
-file_path = tkFileDialog.askopenfilename()
-partida = open(file_path, 'r')
-
-#partida = open('hamshogi_victories/ibisha_vs_ibisha_mod.txt','r')
-movs = partida.read().splitlines()
-partida.close()
 
 reg = re.compile('^\s*(\d+)\s*-\s*(\+?[P|L|N|S|G|K|R|B](\d[a-i])?)([-|x|*])(\d[a-i][=|\+]?)$')
 for e in movs:
@@ -1031,8 +1037,23 @@ def move_back():
 	previous_highlight(pos)
 	return output
 
+def show_names():
+	# *** Player names ***
+	if lamesa.reverted != 1:
+		cad1 = game_data.sente
+		cad2 = game_data.gote
+	else:
+		cad1 = game_data.gote
+		cad2 = game_data.sente
+		
+	label1 = FONT.render(cad1, 1, (0,0,0))
+	SCREEN.blit(label1, (20,304))
+	label2 = FONT.render(cad2, 1, (0,0,0))
+	SCREEN.blit(label2, (930,360))
+
 # *** Pieces arrays *** -> restart
 lamesa.begin()
+show_names()
 matrix = None
 
 cnt_fw = 0
@@ -1041,18 +1062,21 @@ hold_fw = False
 hold_bw = False
 delay = 10
 while True:
-#	pygame.draw.rect(SCREEN, (0,255,0), (305, 305, 70, 70))
-	# Hold mode
+	# Hold mode -> TODO Try to implement it correctly
+	'''
 	if hold_fw:
 		cnt_fw += 1
 		if cnt_fw >= 10 and pos < max_history:
 			redraw()
+			show_names()
 			move_forward()
 	if hold_bw:
 		cnt_bw += 1
 		if cnt_bw >= 10 and pos > 0:
 			redraw()
+			show_names()
 			move_back()
+	'''
 
 	# Optimizing CPU consumption
 	event = pygame.event.wait()
@@ -1063,6 +1087,7 @@ while True:
 		sys.exit()
 	elif event.type == KEYDOWN and event.key == K_d and pos < max_history:
 		redraw()
+		show_names()
 		exec move_forward()
 		hold_fw = True
 		if cnt_fw < 10:
@@ -1072,6 +1097,7 @@ while True:
 		cnt_fw = 0
 	elif event.type == KEYDOWN and event.key == K_a and pos > 0:
 		redraw()
+		show_names()
 		exec move_back()
 		hold_bw = True
 		if cnt_bw < 10:
@@ -1082,6 +1108,7 @@ while True:
 	elif event.type == KEYDOWN and event.key == K_r:
 		lamesa.revert()
 		redraw()
+		show_names()
 		# Invert sprites
 		sprites.revert(lamesa.reverted)
 		previous_highlight(pos)
@@ -1091,7 +1118,7 @@ while True:
 #		elif event.type == KEYDOWN and event.key == K_SPACE:
 #			pygame.image.save(screen, "screenshot.png")
 
-	mx,my = pygame.mouse.get_pos()
+#	mx,my = pygame.mouse.get_pos()
 #	pygame.draw.line(SCREEN, (0,0,0), (20,20), (mx,my))
 
 	# *** Captured pieces display ***
