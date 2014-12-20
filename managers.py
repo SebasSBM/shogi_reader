@@ -200,7 +200,6 @@ class coords_manager:
 			self.coords_y = self.coords_by
 			
 	def revert(self):
-		# TODO Reversión del tablero y las variables que lo controlan
 		self.reverted *= -1
 
 		revert_x = {
@@ -563,9 +562,7 @@ class input_manager:
 				self.gote = gote.match(e).group(2)
 	
 	def prepare_movs(self):
-#		game = game.translate(None, '\n')
 		reg = re.compile('(\+?[P|L|N|S|G|K|R|B](\d[a-i])?[-|x|*]\d[a-i][=|\+]?)')
-#		reg = re.compile('^\s*(\d+)\s*-\s*(\+?[P|L|N|S|G|K|R|B](\d[a-i])?)([-|x|*])(\d[a-i][=|\+]?)$')
 		moves = reg.findall(self.raw)
 		output = ''
 		for i in xrange(0, len(moves)):

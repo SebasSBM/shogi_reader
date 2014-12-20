@@ -49,7 +49,8 @@ matrix = matrix_manager()
 # *** Motion log array ***
 history = []
 
-# *** ALGORYTHM TO READ NOTATION AND TRANSFORM IT INTO DATA EXECUTABLE FORWARD AND BACKWARDS ***
+# *** Load input file ***
+
 import Tkinter, tkFileDialog
 
 root = Tkinter.Tk()
@@ -58,7 +59,6 @@ root.withdraw()
 file_path = tkFileDialog.askopenfilename()
 partida = open(file_path, 'r')
 
-# TODO Prepare a function here that gathers any kind of data structure
 rawgame = partida.read()
 game_data = input_manager(rawgame)
 movs = game_data.movs.splitlines()
@@ -115,9 +115,10 @@ redraw()
 ###
 #
 
+# *** ALGORYTHM TO READ NOTATION AND TRANSFORM IT INTO DATA EXECUTABLE FORWARD AND BACKWARDS ***
+
 reg = re.compile('^\s*(\d+)\s*-\s*(\+?[P|L|N|S|G|K|R|B](\d[a-i])?)([-|x|*])(\d[a-i][=|\+]?)$')
 for e in movs:
-	print e
 	kind = ''
 	action = None
 	promoting = False

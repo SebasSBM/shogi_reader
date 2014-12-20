@@ -17,11 +17,13 @@ For now, the main script(shogi_reader.py) must be run from the directory that co
 
 I've not made a deep research about how to make pygame games work in Windows OS, but I know it is possible. Late or soon, I will implement good installation tools to make this software easy to install in Windows, Linux and MacOS.
 
-### SOME THINGS THAT NEED IMPROVEMENT ###
+### IMPROVEMENTS ###
 
-I will slowly improve some of these things and more when I have some spare time, but any commit made by other users to improve the program would be appreciated.
+I have already improved some things that are worth to be mentioned:
 
-*1*- <b>The notation reading algorithm is not flexible enough because notation must be read strictly with this kind of structure -for instance like this:</b>
+*1*- <b>Now notation reading is much more flexible than before.</b>
+
+  Before, the input file with the notations needed to be listed like this:
 
 	  1- G-7h
 	  2- P-3d
@@ -31,46 +33,49 @@ I will slowly improve some of these things and more when I have some spare time,
 	  6- S-4b
 	  7- S-6h
 
-I use <a href="https://github.com/SebasSBM/shogi_reader/blob/master/shogi_reader.py?ts=4#L111">this regexp</a> to gather the information to be processed: <pre><code>    reg = re.compile('^\s\*(\d+)\s\*-\s\*(\+?\[P|L|N|S|G|K|R|B\](\d[a-i])?)([-|x|\*])(\d[a-i][=|\\+]?)$')</code></pre>
+  Now it is not necessary anymore. The only thing needed now for the program to be able to render the notation is that **it must be correct** (see http://japanesechess.org/notation/shogi_notation.html).
 
-  So, in objects returned by match() function (for instance, called "frag"), frag.group(1) would be the turn number -this is not mandatory for counting the turns though, or it should not be I should say-; frag.group(2) would be the kind of piece moved and desambiguation coords(if included); frag.group(4) gathers if it is a normal move("-"), a capture("x") or a piece drop("*");frag.group(5) would be the rest of the notation -coords where the piece is moved to and promoting symbols if they are present.
+  In other words, no matter if the notation is messy (for instance like this):
 
-  It works perfectly to read the Western Notation, but the algorithm itself is not any flexible about how the different moves are listed. It would fail, for example, if the example above was listed like this:
+	  G-7hP-3d P-7f moves 1,2,3 xD P-4d P-2f [Text inside brackets is
+	   interpreted as metadata and ignored by the moves renderer. So, even
+	   if it contains notations P-7f -> B-7g they will be ignored and won't
+	   interfere] S-4b -> S-6h
 
-		G-7h
-		P-3d
-		P-7f
-		P-4d
-		P-2f
-		S-4b
-		S-6h
+  The current version is able to read and render this mess as well as if it was like the first example.
 
-or this:
+*2*- **Metadata processing methods have been implemented.**
 
-	  1- G-7h  P-3d
-	  2- P-7f  P-4d
-	  3- P-2f  S-4b
+  Now, all content inside brackets [] is interpreted and listed as metadata. All this metadata is filtered out of the moves rendering process.
 
-...among other possible list structures. It would be good that the algorithm was more flexible with this, implementing several different regexps to gather the data instead of just one.
+  The following instances will be used to show the player's names on screen:
 
-*2*- <b>Shogi rules are not fully implemented.</b>
-  The algorithm that processes every move looks for the movement that every kind of piece has, but it overlooks the pieces that are in the way to the target coords. So, new conditionals must be implemented to check if there are pieces in the middle that are blocking the way. And, if they are, and no other piece can make the move, an exception should be thrown telling that the notation is incorrect. In addition, it also overlooks any limitation about dropping captured pieces, then conditionals to prevent "funny" piece drops should also be implemented. And I also should implement conditionals to detect illegal checkmates- checkmating with a pawn drop. As I explain in the 3rd point, I haven't begun to prepare exception handling yet.
+	  [Sente: "Name of black player"] -> OR -> [Black: "Name of black player"]
+	  [Gote: "Name of white player"] -> OR -> [White: "Name of white player"]
 
-*3*- <b>The program doesn't handle potential exceptions that may occurr if the game notation was incorrect nor other stuff.</b>
+
+### SOME THINGS THAT NEED IMPROVEMENT ###
+
+I will slowly improve some of these things and more when I have some spare time, but any commit made by other users to improve the program would be appreciated.
+
+*1*- <b>Shogi rules are not fully implemented.</b>
+   The moves rendering functions look only for legal moves when moving pieces. However, it could skip a move if there wasn't any piece able to perform that, doing what I call a "double turn moving" because that turn is skipped. It also overlooks any limitation about dropping captured pieces, then conditionals to prevent "funny" piece drops should also be implemented. Other thing has been overlooked is the promotion rules (you could place the symbol '+' after a move and piece would be promotioned even if it can't yet). Conditionals to detect illegal checkmates- checkmating with a pawn drop.- should also be implemented. As I explain in the 3rd point, I haven't begun to prepare exception handling yet.
+
+*2*- <b>The program doesn't handle potential exceptions that may occurr if the game notation was incorrect nor other stuff.</b>
 
   I haven't begun with exception handling routines yet, because my main priority until now was just to make this work with correct notations and to implement the basic features -captured pieces sprites, last move highlighting and the feature to reverse the board at any moment-. Now that these basic features are ready, my next task will probably be to start implementing basic exception handling. Some of the exceptions that should be created and/or handled are:
   
 - Making sure that the piece can perform the move without breaking any shogi rule- as explained at point 2.
-- Exceptions for when the regexp that splits the data of a line to be processed just doesn't match.
+- Exceptions when no notations are found at all in the input file.
 - Exceptions when no legal move is detected for that line.
 - Exceptions when the notation of a single move allows more than one piece to perform the move (ambiguity warning).
 - Exception when you click "Cancel" in the loading game dialog box (Python throws "No such file" in this situation, but it would be cool to prepare a more clean way to handle this exception).
 
-  The most interesting exception to handle: for example, top-right square is 1a, and bottom-left 9i. If coords were reverted (notation rules say that black player -the first to move- must be at the top side of the board at the beginning. Reverted would mean that the first to move is at the bottom side), the algorithm doesn't detect any legal move and gets stuck. In order to correct this kind of wrong notations, I've made the script reverter.py that takes a notated game file and reverts every single coord. It would be interesting to implement revert.py's algorithm as a first step to handle an exception where no legal move is found by the computer in a line that matched the regexp that gathers the data (compiled to the variable "reg").
+  The most interesting exception to handle: for example, top-right square is 1a, and bottom-left 9i. If coords were reverted (notation rules say that black player -the first to move- must be at the top side of the board at the beginning. Reverted would mean that the first to move is at the bottom side. See http://japanesechess.org/notation/shogi_notation.html for more details.), the algorithm doesn't detect any legal move and gets stuck. In order to correct this kind of wrong notations, I've made the script reverter.py that takes a notated game file and reverts every single coord. It would be interesting to implement revert.py's algorithm as a first step to handle an exception where no legal move is found by the computer in a line that matched the regexp that gathers the data (compiled to the variable "reg").
   
-*4*- <b>Metadata reading and processing.</b>
+*3*- <b>Metadata reading and processing.</b>
 
-  Recently, I've noticed that some of the notated games that you can find over the internet (like games played at <a href="http://playok.com">playok.com</a> or professional games notated and uploaded to the internet) use to include some metadata, like:
+  Recently, I've noticed that some of the notated games that you can find over the internet (like games played at <a href="http://playok.com">playok.com</a> or professional games notated and uploaded to the internet, like the ones I found in http://www2.teu.ac.jp/gamelab/SHOGI/kifumain.html) use to include some metadata, like:
   
 - Names of both players.
 - Date when the game was played.
@@ -78,4 +83,6 @@ or this:
     
 ...among other stuff. It would be interesting to implement player's name gathering and comments in the first place, and, maybe, other stuff too.
 
-*5*- <b>Preparing a good installation script for as many operative systems as possible.</b>
+*4*- <b>Preparing a good installation script for as many operative systems as possible.</b>
+
+*5* **More visual improvements for the GUI**
