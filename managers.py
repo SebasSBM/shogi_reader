@@ -22,6 +22,7 @@
 	This file contains the classes defined for shogi_reader
 """
 import pygame, re, tkMessageBox
+from globales import MAINPATH, SCREEN, FONT
 
 class coords_manager:
 	def __init__(self):
@@ -283,62 +284,62 @@ class coords_manager:
 
 class sprites_manager:
 	def __init__(self):
-		self.pawn_probe = pygame.image.load("ShogiSprites/Peon.png")
+		self.pawn_probe = pygame.image.load(MAINPATH + "ShogiSprites/Peon.png")
 		self.pn_img = None
 		self.pb_img = None
 
-		self.spawn_probe = pygame.image.load("ShogiSprites/SPeon.png")
+		self.spawn_probe = pygame.image.load(MAINPATH + "ShogiSprites/SPeon.png")
 		self.spn_img = None
 		self.spb_img = None
 
-		self.lance_probe = pygame.image.load("ShogiSprites/Lanza.png")
+		self.lance_probe = pygame.image.load(MAINPATH + "ShogiSprites/Lanza.png")
 		self.ln_img = None
 		self.lb_img = None
 
-		self.slance_probe = pygame.image.load("ShogiSprites/SLanza.png")
+		self.slance_probe = pygame.image.load(MAINPATH + "ShogiSprites/SLanza.png")
 		self.sln_img = None
 		self.slb_img = None
 
-		self.knight_probe = pygame.image.load("ShogiSprites/Caballo.png")
+		self.knight_probe = pygame.image.load(MAINPATH + "ShogiSprites/Caballo.png")
 		self.nn_img = None
 		self.nb_img = None
 
-		self.sknight_probe = pygame.image.load("ShogiSprites/SCaballo.png")
+		self.sknight_probe = pygame.image.load(MAINPATH + "ShogiSprites/SCaballo.png")
 		self.snn_img = None
 		self.snb_img = None
 
-		self.silver_probe = pygame.image.load("ShogiSprites/Plata.png")
+		self.silver_probe = pygame.image.load(MAINPATH + "ShogiSprites/Plata.png")
 		self.sn_img = None
 		self.sb_img = None
 
-		self.ssilver_probe = pygame.image.load("ShogiSprites/SPlata.png")
+		self.ssilver_probe = pygame.image.load(MAINPATH + "ShogiSprites/SPlata.png")
 		self.ssn_img = None
 		self.ssb_img = None
 
-		self.gold_probe = pygame.image.load("ShogiSprites/Oro.png")
+		self.gold_probe = pygame.image.load(MAINPATH + "ShogiSprites/Oro.png")
 		self.gn_img = None
 		self.gb_img = None
 
-		self.tower_probe = pygame.image.load("ShogiSprites/Torre.png")
+		self.tower_probe = pygame.image.load(MAINPATH + "ShogiSprites/Torre.png")
 		self.tn_img = None
 		self.tb_img = None
 
-		self.stower_probe = pygame.image.load("ShogiSprites/STorre.png")
+		self.stower_probe = pygame.image.load(MAINPATH + "ShogiSprites/STorre.png")
 		self.stn_img = None
 		self.stb_img = None
 
-		self.bishop_probe = pygame.image.load("ShogiSprites/Alfil.png")
+		self.bishop_probe = pygame.image.load(MAINPATH + "ShogiSprites/Alfil.png")
 		self.bn_img = None
 		self.bb_img = None
 
-		self.sbishop_probe = pygame.image.load("ShogiSprites/SAlfil.png")
+		self.sbishop_probe = pygame.image.load(MAINPATH + "ShogiSprites/SAlfil.png")
 		self.sbn_img = None
 		self.sbb_img = None
 
-		self.kingn_probe = pygame.image.load("ShogiSprites/ReyN.png")
+		self.kingn_probe = pygame.image.load(MAINPATH + "ShogiSprites/ReyN.png")
 		self.kn_img = None
 
-		self.kingb_probe = pygame.image.load("ShogiSprites/ReyB.png")
+		self.kingb_probe = pygame.image.load(MAINPATH + "ShogiSprites/ReyB.png")
 		self.kb_img = None
 		self.revert(1)
 
