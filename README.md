@@ -13,7 +13,7 @@ This software is made with Python and uses the Pygame library to work, so, your 
 - Python installed (usually, Linux based OS have Python installed by default, but there may be exceptions).
 - Pygame library installed.
 
-For now, the main script(shogi_reader.py) must be run from the directory that contains it, or else the sprites won't be found by the script and the script won't work at all. I will prepare some global variables to wipe out this error ASAP.
+Global variables have been implemented to grant that the software will find the sprites properly no matter where the Shogi Reader is executed from.
 
 I've not made a deep research about how to make pygame games work in Windows OS, but I know it is possible. Late or soon, I will implement good installation tools to make this software easy to install in Windows, Linux and MacOS.
 
@@ -59,17 +59,15 @@ I have already improved some things that are worth to be mentioned:
 I will slowly improve some of these things and more when I have some spare time, but any commit made by other users to improve the program would be appreciated.
 
 *1*- <b>Shogi rules are not fully implemented.</b>
-   The moves rendering functions look only for legal moves when moving pieces. However, it could skip a move if there wasn't any piece able to perform that, doing what I call a "double turn moving" because that turn is skipped. It also overlooks any limitation about dropping captured pieces, then conditionals to prevent "funny" piece drops should also be implemented. Other thing has been overlooked is the promotion rules (you could place the symbol '+' after a move and piece would be promotioned even if it can't yet). Conditionals to detect illegal checkmates- checkmating with a pawn drop.- should also be implemented. As I explain in the 2nd point, I haven't begun to prepare exception handling yet.
+   The moves rendering functions look only for legal moves when moving pieces. However, it could skip a move if there wasn't any piece able to perform that, doing what I call a "double turn moving" because that turn is skipped. It also overlooks any limitation about dropping captured pieces, then conditionals to prevent "funny" piece drops should also be implemented. Other thing has been overlooked is the promotion rules (you could place the symbol '+' after a move and piece would be promotioned even if it can't yet). Conditionals to detect illegal checkmates- checkmating with a pawn drop.- should also be implemented.
 
-*2*- <b>The program doesn't handle potential exceptions that may occurr if the game notation was incorrect nor other stuff.</b>
+*2*- <b>The program doesn't handle all the potential exceptions yet.</b>
 
-  I haven't begun with exception handling routines yet, because my main priority until now was just to make this work with correct notations and to implement the basic features -captured pieces sprites, last move highlighting and the feature to reverse the board at any moment-. Now that these basic features are ready, my next task will probably be to start implementing basic exception handling. Some of the exceptions that should be created and/or handled are:
+  Basic exception handling has already been implemented, but there are some potential exceptions that are not handled yet. Some of the exceptions pending of being created and/or handled are:
   
 - Making sure that the piece can perform the move without breaking any shogi rule- as explained at point 2.
-- Exceptions when no notations are found at all in the input file.
-- Exceptions when no legal move is detected for that line.
-- Exceptions when the notation of a single move allows more than one piece to perform the move (ambiguity warning).
-- Exception when you click "Cancel" in the loading game dialog box (Python throws "No such file" in this situation, but it would be cool to prepare a more clean way to handle this exception).
+- Reverted Notation automatic handling, as explained below.
+- Some other potential exceptions that I haven't figured out yet.
 
   The most interesting exception to handle: for example, top-right square is 1a, and bottom-left 9i. If coords were reverted (notation rules say that black player -the first to move- must be at the top side of the board at the beginning. Reverted would mean that the first to move is at the bottom side. See http://japanesechess.org/notation/shogi_notation.html for more details.), the algorithm doesn't detect any legal move and gets stuck. In order to correct this kind of wrong notations, I've made the script reverter.py that takes a notated game file and reverts every single coord. It would be interesting to implement revert.py's algorithm as a first step to handle an exception where no legal move is found by the computer in a line that matched the regexp that gathers the data (compiled to the variable "reg").
   
@@ -81,7 +79,7 @@ I will slowly improve some of these things and more when I have some spare time,
 - Date when the game was played.
 - Comments about the match and why did the players make the decision they made.
     
-...among other stuff. It would be interesting to implement player's name gathering and comments in the first place, and, maybe, other stuff too.
+...among other stuff. Metadata handling has already been implemented, but only player names are used by the program yet. Finding a good way to implement comments display is a good point. Also, maybe I should implement date displaying. It would be also interesting to implement some way to load a photo for certain player names, but I still have to think about the best way to implement this.
 
 *4*- <b>Preparing a good installation script for as many operative systems as possible.</b>
 
