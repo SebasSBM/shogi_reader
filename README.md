@@ -1,7 +1,7 @@
 shogi_reader
 ============
 
-Script that uses pygame to convert Shogi Western Notation into easily-replayable games.
+shogi_reader.py is a script that uses pygame to convert Shogi Western Notation into easily-replayable games.
 
 ### ABOUT ShogiReader ###
 
