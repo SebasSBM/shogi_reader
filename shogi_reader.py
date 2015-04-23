@@ -23,8 +23,8 @@
 	and makes them easy to replay.
 
 	Control keys:
-		D -> Forward
-		A -> Backwards
+		D / → -> Forward
+		A / ← -> Backwards
 		R -> Reverse board
 
 	Open the files in "games_recorded" directory to see how it works.
@@ -972,24 +972,24 @@ while True:
 		sys.exit()
 	elif event.type == KEYDOWN and event.key == K_ESCAPE:
 		sys.exit()
-	elif event.type == KEYDOWN and event.key == K_d and get_pos() < max_history:
+	elif event.type == KEYDOWN and (event.key == K_d or event.key == K_RIGHT) and get_pos() < max_history:
 		redraw()
 		show_names()
 		exec move_forward()
 		hold_fw = True
 		if cnt_fw < 10:
 			cnt_fw += 1
-	elif event.type == KEYUP and event.key == K_d:
+	elif event.type == KEYUP and (event.key == K_d or event.key == K_RIGHT):
 		hold_fw = False
 		cnt_fw = 0
-	elif event.type == KEYDOWN and event.key == K_a and get_pos() > 0:
+	elif event.type == KEYDOWN and (event.key == K_a or event.key == K_LEFT) and get_pos() > 0:
 		redraw()
 		show_names()
 		exec move_back()
 		hold_bw = True
 		if cnt_bw < 10:
 			cnt_bw += 1
-	elif event.type == KEYUP and event.key == K_a:
+	elif event.type == KEYUP and (event.key == K_a or event.key == K_LEFT):
 		hold_bw = False
 		cnt_bw = 0
 	elif event.type == KEYDOWN and event.key == K_r:
