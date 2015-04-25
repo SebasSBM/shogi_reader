@@ -176,7 +176,7 @@ def show_names():
 	label1 = FONT.render(cad1, 1, (0,0,0))
 	SCREEN.blit(label1, (20,304))
 	label2 = FONT.render(cad2, 1, (0,0,0))
-	SCREEN.blit(label2, (930,360))
+	SCREEN.blit(label2, (930,355))
 
 def get_pos():
 	return pos

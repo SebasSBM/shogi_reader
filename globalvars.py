@@ -13,7 +13,7 @@ import Tkinter, tkFileDialog
 root = Tkinter.Tk()
 root.withdraw()
 
-file_path = tkFileDialog.askopenfilename()
+file_path = tkFileDialog.askopenfilename(filetypes = (('*.TXT files','*.txt'),('ALL FILES','*')))
 if file_path == '':
     exit()
 partida = open(file_path, 'r')
