@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # * coding: utf-8 *
 
+### WARNING: This script is outdated, it needs a very specific notation format to work.
+
 """
-	Copyright (C) 2014  Sebastián Bover Mota <sebassbm.info@gmail.com>
+    Copyright (C) 2014  Sebastián Bover Mota <sebassbm.info@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,53 +40,53 @@ partida.close()
 reg = re.compile('^(\s*\d+-\s)(.*)([-|x|\*])(.*)$')
 
 coords_a = {
-	'1': '9',
-	'2': '8',
-	'3': '7',
-	'4': '6',
-	'5': '5',
-	'6': '4',
-	'7': '3',
-	'8': '2',
-	'9': '1'
+    '1': '9',
+    '2': '8',
+    '3': '7',
+    '4': '6',
+    '5': '5',
+    '6': '4',
+    '7': '3',
+    '8': '2',
+    '9': '1'
 }
 coords_b = {
-	'i': 'a',
-	'h': 'b',
-	'g': 'c',
-	'f': 'd',
-	'e': 'e',
-	'd': 'f',
-	'c': 'g',
-	'b': 'h',
-	'a': 'i'
+    'i': 'a',
+    'h': 'b',
+    'g': 'c',
+    'f': 'd',
+    'e': 'e',
+    'd': 'f',
+    'c': 'g',
+    'b': 'h',
+    'a': 'i'
 }
 
 output = ''
 for e in movs:
-	piece_x = ''
-	piece_y = ''
-	extra = ''
-	frag = reg.match(e)
-	if (len(frag.group(2)) > 1 and frag.group(2)[0] != '+') or (len(frag.group(2)) > 2 and frag.group(2)[0] == '+'):
-		if frag.group(2)[0] == '+':
-			kind = frag.group(2)[0:2]
-			piece_x = coords_a[frag.group(2)[2]]
-			piece_y = coords_b[frag.group(2)[3]]
-		else:
-			kind = frag.group(2)[0]
-			piece_x = coords_a[frag.group(2)[1]]
-			piece_y = coords_b[frag.group(2)[2]]
-	else:
-		kind = frag.group(2)
+    piece_x = ''
+    piece_y = ''
+    extra = ''
+    frag = reg.match(e)
+    if (len(frag.group(2)) > 1 and frag.group(2)[0] != '+') or (len(frag.group(2)) > 2 and frag.group(2)[0] == '+'):
+        if frag.group(2)[0] == '+':
+            kind = frag.group(2)[0:2]
+            piece_x = coords_a[frag.group(2)[2]]
+            piece_y = coords_b[frag.group(2)[3]]
+        else:
+            kind = frag.group(2)[0]
+            piece_x = coords_a[frag.group(2)[1]]
+            piece_y = coords_b[frag.group(2)[2]]
+    else:
+        kind = frag.group(2)
 
-	dest_x = coords_a[frag.group(4)[0]]
-	dest_y = coords_b[frag.group(4)[1]]
+    dest_x = coords_a[frag.group(4)[0]]
+    dest_y = coords_b[frag.group(4)[1]]
 
-	if len(frag.group(4)) == 3:
-		extra = frag.group(4)[2]
+    if len(frag.group(4)) == 3:
+        extra = frag.group(4)[2]
 
-	output += frag.group(1) + kind + piece_x + piece_y + frag.group(3) + dest_x + dest_y + extra + '\n'
+    output += frag.group(1) + kind + piece_x + piece_y + frag.group(3) + dest_x + dest_y + extra + '\n'
 
 #TODO This regexp should probably be more accurate than this
 slash = re.match('^(.*)(\.\w*)$', file_path)
