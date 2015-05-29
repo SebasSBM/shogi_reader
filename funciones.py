@@ -81,17 +81,17 @@ def move_forward():
             exec statem
             if history[pos][3] == True: #Handle piece_promotion==True
                 #TODO Simplify this task avoiding the regexp abuse
-                prueba = re.match('^.*\[(.*)\]$', history[pos][0])
+                prueba = re.match(r'^.*\[(.*)\]$', history[pos][0])
                 statem = 'prueba2=lamesa.'+history[pos][0]
                 exec statem
                 statem = 'del lamesa.'+history[pos][0]
                 exec statem
-                prueba4 = re.match('^.*_(.*)\[.*\]$', history[pos][0])
+                prueba4 = re.match(r'^.*_(.*)\[.*\]$', history[pos][0])
                 statem = 'lamesa.lista_s'+prueba4.group(1)+'['+prueba.group(1)+']=['+(str)(prueba2[0])+','+(str)(prueba2[1])+']'
                 exec statem
         if history[pos][4] != '':#Piece captured that has to be respawn backwards
             # TODO Avoid regexp abuse
-            frag = re.match('^(lista_(.*)\[.*\])=\[.*,.*\]$', history[pos][4])
+            frag = re.match(r'^(lista_(.*)\[.*\])=\[.*,.*\]$', history[pos][4])
             theobj = frag.group(1)
             piece = frag.group(2)
             if len(piece) == 3:
@@ -138,8 +138,8 @@ def move_back():
         else:
             if history[pos][3] == True:
                 #TODO Avoid regexp abuse
-                prueba = re.match('^.*\[(.*)\]$', history[pos][0])
-                prueba4 = re.match('^.*_(.*)\[.*\]$', history[pos][0])
+                prueba = re.match(r'^.*\[(.*)\]$', history[pos][0])
+                prueba4 = re.match(r'^.*_(.*)\[.*\]$', history[pos][0])
                 statem = 'prueba2=lamesa.lista_s'+prueba4.group(1)+'['+prueba.group(1)+']'
                 exec statem
                 statem = 'lamesa.'+history[pos][0]+'=['+(str)(prueba2[0])+','+(str)(prueba2[1])+']'
@@ -151,7 +151,7 @@ def move_back():
             statem = 'lamesa.'+history[pos][0]+'[1]-='+(str)(history[pos][1][1]*lamesa.reverted)
             exec statem
         if history[pos][4] != '':
-            frag = re.match('^lista_(.*)\[.*\]=\[.*,.*\]$', history[pos][4])
+            frag = re.match(r'^lista_(.*)\[.*\]=\[.*,.*\]$', history[pos][4])
             piece = frag.group(1)
             if len(piece) == 3:
                 piece = piece[1:]

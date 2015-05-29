@@ -548,14 +548,14 @@ class input_manager:
         self.prepare_movs()
 
     def get_metadata(self):
-        reg = re.compile('\[[^\[\]]*\]')
+        reg = re.compile(r'\[[^\[\]]*\]')
         self.metadata = reg.findall(self.raw)
         for e in self.metadata:
             self.raw = self.raw.replace(e, '')
 
     def get_names(self):
-        sente = re.compile('\[([Ss]ente|[Bb]lack)[:\s][^\[\]]*"([a-zA-z0-9][^\[\]]*)"\s*\]')
-        gote = re.compile('\[([Gg]ote|[Ww]hite)[:\s][^\[\]]*"([a-zA-z0-9][^\[\]]*)"\s*\]')
+        sente = re.compile(r'\[([Ss]ente|[Bb]lack)[:\s][^\[\]]*"([a-zA-z0-9][^\[\]]*)"\s*\]')
+        gote = re.compile(r'\[([Gg]ote|[Ww]hite)[:\s][^\[\]]*"([a-zA-z0-9][^\[\]]*)"\s*\]')
         for e in self.metadata:
             if sente.match(e):
                 self.sente = sente.match(e).group(2)
@@ -563,7 +563,7 @@ class input_manager:
                 self.gote = gote.match(e).group(2)
     
     def prepare_movs(self):
-        reg = re.compile('(\+?[P|L|N|S|G|K|R|B](\d[a-i])?[-|x|*]\d[a-i][=|\+]?)')
+        reg = re.compile(r'(\+?[P|L|N|S|G|K|R|B](\d[a-i])?[-|x|*]\d[a-i][=|\+]?)')
         moves = reg.findall(self.raw)
         output = ''
         if moves == []:
