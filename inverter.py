@@ -37,7 +37,7 @@ partida = open(file_path,'r')
 movs = partida.read().splitlines()
 partida.close()
 
-reg = re.compile('^(\s*\d+-\s)(.*)([-|x|\*])(.*)$')
+reg = re.compile(r'^(\s*\d+-\s)(.*)([-|x|\*])(.*)$')
 
 coords_a = {
     '1': '9',
@@ -89,7 +89,7 @@ for e in movs:
     output += frag.group(1) + kind + piece_x + piece_y + frag.group(3) + dest_x + dest_y + extra + '\n'
 
 #TODO This regexp should probably be more accurate than this
-slash = re.match('^(.*)(\.\w*)$', file_path)
+slash = re.match(r'^(.*)(\.\w*)$', file_path)
 
 frag_path = slash.group(1)
 ext = slash.group(2)

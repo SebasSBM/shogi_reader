@@ -113,7 +113,7 @@ def previous_highlight(cursor=pos):
         if cursor > 0:
             obj = history[cursor-1][0]
             if history[cursor-1][3] == True:
-                frag = re.match('^lista_(.*\[.*\])$', obj)
+                frag = re.match(r'^lista_(.*\[.*\])$', obj)
                 obj = 'lista_s'+frag.group(1)
             statem = 'coords=lamesa.'+obj
             exec statem

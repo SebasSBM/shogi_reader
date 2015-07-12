@@ -66,43 +66,45 @@ redraw()
 
 # *** ALGORITHM TO READ NOTATION AND TRANSFORM IT INTO DATA EXECUTABLE FORWARD AND BACKWARDS ***
 
-reg = re.compile(r'^\s*(\d+)\s*-\s*(\+?[P|L|N|S|G|K|R|B](\d[a-i])?)([-|x|*])(\d[a-i][=|\+]?)$')
+#reg = re.compile(r'^\s*(\d+)\s*-\s*(\+?[P|L|N|S|G|K|R|B](\d[a-i])?)([-|x|*])(\d[a-i][=|\+]?)$')
+reg = re.compile(r"""^\s*(?P<move_num>\d+)
+                     \s*-\s*(?P<piece>\+?[PLNSGKRB])(?P<from>\d[a-i])?
+                     (?P<action>[-x*])
+                     (?P<to>\d[a-i][=+]?)$""", re.VERBOSE)
 error_cnt = 0
 
 for move in movs:
     move_to_add = None
-    kind = ''
     action = None
     promoting = False
     piece_respawn = ''
     piece_x = 0
     piece_y = 0
     frag = reg.match(move)
-    destiny = [lamesa.coords_x[frag.group(5)[0]],lamesa.coords_y[frag.group(5)[1]]]
-    destiny_h = frag.group(5)
-    if len(frag.group(5)) > 2:
-        if frag.group(5)[2] == '+':
+    num_g = frag.group('move_num')
+    piece_g = frag.group('piece')
+    from_g = frag.group('from')
+    to_g = frag.group('to')
+    action_g = frag.group('action')
+#   destiny = [lamesa.coords_x[frag.group(5)[0]],lamesa.coords_y[frag.group(5)[1]]]
+    destiny = [lamesa.coords_x[to_g[0]], lamesa.coords_y[to_g[1]]]
+    destiny_h = to_g
+    kind = piece_g
+    if len(to_g) > 2:
+        if to_g[2] == '+':
             promoting = True
-    if (len(frag.group(2)) > 1 and frag.group(2)[0] != '+') or (len(frag.group(2)) > 2 and frag.group(2)[0] == '+'):
-        if frag.group(2)[0] == '+':
-            kind = frag.group(2)[0:2]
-            piece_x = lamesa.coords_x[frag.group(2)[2]]
-            piece_y = lamesa.coords_y[frag.group(2)[3]]
-        else:
-            kind = frag.group(2)[0]
-            piece_x = lamesa.coords_x[frag.group(2)[1]]
-            piece_y = lamesa.coords_y[frag.group(2)[2]]
-    else:
-        kind = frag.group(2)
-    if frag.group(4) == 'x':
+    if from_g != None:
+        piece_x = lamesa.coords_x[from_g[0]]
+        piece_y = lamesa.coords_y[from_g[1]]
+    if action_g == 'x':
         action = 1
-    elif frag.group(4) == '*':
+    elif action_g == '*':
         action = 2
-    elif frag.group(4) == '-':
+    elif action_g == '-':
         action = 0
 
     if action == 1:
-        if int(frag.group(1)) % 2 == 1: #Negras
+        if int(num_g) % 2 == 1: #Negras
             found = False
             while found == False:
                 for k, e in lamesa.lista_pb.items():
@@ -343,7 +345,7 @@ for move in movs:
     # TODO Ambiguity warning catch
     possible_moves = 0
     if piece_x == 0 and action != 2:
-        if int(frag.group(1)) % 2 == 1: #Negras
+        if int(num_g) % 2 == 1: #Negras
             if kind == 'P':
                 for k, pn in lamesa.lista_pn.items():
                     if destiny[0] == pn[0] and destiny[1] == pn[1]-71:
@@ -588,7 +590,7 @@ for move in movs:
                     lamesa.rey_b = destiny
                     matrix.fill(destiny_h)
     elif action != 2:
-        if int(frag.group(1)) % 2 == 1: #Negras
+        if int(num_g) % 2 == 1: #Negras
             if kind == 'P':
                 for k, pn in lamesa.lista_pn.items():
                     if pn[0] == piece_x and pn[1] == piece_y:
@@ -813,7 +815,7 @@ for move in movs:
                     lamesa.rey_b = destiny
                     matrix.fill(destiny_h)
     else: # Action=2 (reingreso)
-        if int(frag.group(1)) % 2 == 1: #Negras
+        if int(num_g) % 2 == 1: #Negras
             player = 'n'
         else:
             player = 'b'
