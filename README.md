@@ -3,8 +3,8 @@ shogi_reader
 
 shogi_reader.py is a script that uses pygame to convert Shogi Western Notation into easily-replayable games.
 
-**WARNING: The last commit broke the code.** I will try to resolve the issue when I have somemore time to dedicate
-to this project. Until then, please download source from the previous commit.
+**WARNING: The <a href="https://github.com/SebasSBM/shogi_reader/tree/7a08ca927ff1fa1987ecdb0e933e0f436adebf95">last commit</a> broke the code.** I will try to resolve the issue when I have somemore time to dedicate
+to this project. Until then, I recommend downloading the source from the <a href="https://github.com/SebasSBM/shogi_reader/tree/2ee652452fc452263012b693a995f2cf8675cf16">previous commit</a> due to it is the latest stable version.
 
 ### ABOUT ShogiReader ###
 
