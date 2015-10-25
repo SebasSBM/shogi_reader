@@ -25,6 +25,7 @@ import pygame
 from globales import *
 from globalvars import *
 
+
 # ******* TABLERO ********
 
 def redraw():
@@ -67,17 +68,32 @@ def move_forward():
     output = ''
     if pos < len(history):
         if history[pos][2] == 2:
-            #In this case,
-            # history[pos] structure -> [[kind_of_piece,counter_to_assign_id], destiny_coords, action, promoting, piece_respawn]
-            statem = 'lamesa.lista_'+history[pos][0][0]+'['+(str)(history[pos][0][1])+']=['+(str)(lamesa.coords_x[history[pos][1][0]])+','+(str)(lamesa.coords_y[history[pos][1][1]])+']'
+            '''
+             In this case,
+              history[pos] structure -> [
+                       [kind_of_piece,counter_to_assign_id],
+                       destiny_coords,
+                       action,
+                       promoting,
+                       piece_respawn]
+            '''
+            statem  = 'lamesa.lista['+history[pos][0][0].upper()+']['
+            statem += (str)(history[pos][0][1])+']=['
+            statem += (str)(lamesa.coords_x[history[pos][1][0]])+','
+            statem += (str)(lamesa.coords_y[history[pos][1][1]])+']'
             exec statem
-            output = 'lamesa.r'+history[pos][0][0]+' -= 1'
+            output = 'lamesa.r'+history[pos][0][0].lower()+' -= 1'
         else:
             # Standard case,
-            # history[pos] structure -> [code_statement_to_select_piece, coords_sum, action, promoting, piece_respawn]
-            statem = 'lamesa.'+history[pos][0]+'[0]+='+(str)(history[pos][1][0]*lamesa.reverted)
+            # history[pos] structure -> [
+            #        code_statement_to_select_piece,
+            #        coords_sum, action, promoting, piece_respawn]
+            statem = ('lamesa.'+history[pos][0]+'[0]+='+
+                      (str)(history[pos][1][0]*lamesa.reverted))
             exec statem
-            statem = 'lamesa.'+history[pos][0]+'[1]+='+(str)(history[pos][1][1]*lamesa.reverted)
+
+            statem = ('lamesa.'+history[pos][0]+'[1]+='+
+                      (str)(history[pos][1][1]*lamesa.reverted))
             exec statem
             if history[pos][3] == True: #Handle piece_promotion==True
                 #TODO Simplify this task avoiding the regexp abuse
@@ -86,12 +102,17 @@ def move_forward():
                 exec statem
                 statem = 'del lamesa.'+history[pos][0]
                 exec statem
-                prueba4 = re.match(r'^.*_(.*)\[.*\]$', history[pos][0])
-                statem = 'lamesa.lista_s'+prueba4.group(1)+'['+prueba.group(1)+']=['+(str)(prueba2[0])+','+(str)(prueba2[1])+']'
+                prueba4 = re.match(r'^.*\[(.*)\]\[.*\]$', history[pos][0])
+                statem = ('lamesa.lista[S'+prueba4.group(1)+']['+
+                            prueba.group(1)+']=['+(str)(prueba2[0])+','+
+                                                    (str)(prueba2[1])+']')
                 exec statem
-        if history[pos][4] != '':#Piece captured that has to be respawn backwards
+
+        #Piece captured that has to be respawn backwards
+        if history[pos][4] != '':
             # TODO Avoid regexp abuse
-            frag = re.match(r'^(lista_(.*)\[.*\])=\[.*,.*\]$', history[pos][4])
+            frag = re.match(r'^(lista\[(.*)\]\[.*\])=\[.*,.*\]$',
+                             history[pos][4])
             theobj = frag.group(1)
             piece = frag.group(2)
             if len(piece) == 3:
@@ -102,7 +123,7 @@ def move_forward():
                 piece = piece[:-1]+'b'
             statem = 'del lamesa.'+theobj
             exec statem
-            output = 'lamesa.r'+piece+' += 1'
+            output = 'lamesa.r'+piece.lower()+' += 1'
         pos += 1
         previous_highlight(pos)
     return output
@@ -113,16 +134,21 @@ def previous_highlight(cursor=pos):
         if cursor > 0:
             obj = history[cursor-1][0]
             if history[cursor-1][3] == True:
-                frag = re.match(r'^lista_(.*\[.*\])$', obj)
-                obj = 'lista_s'+frag.group(1)
+                frag = re.match(r'^lista\[(.*\]\[.*\])$', obj)
+                obj = 'lista[S'+frag.group(1)
             statem = 'coords=lamesa.'+obj
             exec statem
-            drawcoords = [coords[0]-history[cursor-1][1][0]*lamesa.reverted,coords[1]-history[cursor-1][1][1]*lamesa.reverted]
-            pygame.draw.rect(SCREEN, (255,0,0), (drawcoords[0], drawcoords[1], 70, 70))
+            drawcoords = [coords[0]-history[cursor-1][1][0]*lamesa.reverted,
+                          coords[1]-history[cursor-1][1][1]*lamesa.reverted]
+            pygame.draw.rect(SCREEN, (255,0,0),
+                             (drawcoords[0], drawcoords[1], 70, 70))
             drawcoords = [coords[0],coords[1]]
-            pygame.draw.rect(SCREEN, (0,255,0), (drawcoords[0], drawcoords[1], 70, 70))
+            pygame.draw.rect(SCREEN, (0,255,0),
+                             (drawcoords[0], drawcoords[1], 70, 70))
     elif cursor > 0:
-        pygame.draw.rect(SCREEN, (0,255,0), (lamesa.coords_x[history[cursor-1][1][0]], lamesa.coords_y[history[cursor-1][1][1]], 70, 70))
+        pygame.draw.rect(SCREEN, (0,255,0),(
+                          lamesa.coords_x[history[cursor-1][1][0]],
+                          lamesa.coords_y[history[cursor-1][1][1]],70, 70))
 
             
     
@@ -132,26 +158,33 @@ def move_back():
     if pos > 0:
         pos -= 1
         if history[pos][2] == 2:
-            statem = 'del lamesa.lista_'+history[pos][0][0]+'['+(str)(history[pos][0][1])+']'
+            statem = ('del lamesa.lista['+history[pos][0][0].upper()+']['+
+                       (str)(history[pos][0][1])+']')
             exec statem
-            output = 'lamesa.r'+history[pos][0][0]+' += 1'
+            output = 'lamesa.r'+history[pos][0][0].lower()+' += 1'
         else:
             if history[pos][3] == True:
                 #TODO Avoid regexp abuse
                 prueba = re.match(r'^.*\[(.*)\]$', history[pos][0])
-                prueba4 = re.match(r'^.*_(.*)\[.*\]$', history[pos][0])
-                statem = 'prueba2=lamesa.lista_s'+prueba4.group(1)+'['+prueba.group(1)+']'
+                prueba4 = re.match(r'^.*\[(.*)\]\[.*\]$', history[pos][0])
+                statem = ('prueba2=lamesa.lista[S'+prueba4.group(1)+']['+
+                           prueba.group(1)+']')
                 exec statem
-                statem = 'lamesa.'+history[pos][0]+'=['+(str)(prueba2[0])+','+(str)(prueba2[1])+']'
+                statem = ('lamesa.'+history[pos][0]+'=['+(str)(prueba2[0])+
+                          ','+(str)(prueba2[1])+']')
                 exec statem
-                statem = 'del lamesa.lista_s'+prueba4.group(1)+'['+prueba.group(1)+']'
+                statem = ('del lamesa.lista[S'+prueba4.group(1)+']['+
+                           prueba.group(1)+']')
                 exec statem
-            statem = 'lamesa.'+history[pos][0]+'[0]-='+(str)(history[pos][1][0]*lamesa.reverted)
+            statem = ('lamesa.'+history[pos][0]+'[0]-='+
+                      (str)(history[pos][1][0]*lamesa.reverted))
             exec statem
-            statem = 'lamesa.'+history[pos][0]+'[1]-='+(str)(history[pos][1][1]*lamesa.reverted)
+            statem = ('lamesa.'+history[pos][0]+'[1]-='+
+                      (str)(history[pos][1][1]*lamesa.reverted))
             exec statem
         if history[pos][4] != '':
-            frag = re.match(r'^lista_(.*)\[.*\]=\[.*,.*\]$', history[pos][4])
+            frag = re.match(r'^lista\[(.*)\]\[.*\]=\[.*,.*\]$',
+                            history[pos][4])
             piece = frag.group(1)
             if len(piece) == 3:
                 piece = piece[1:]
@@ -160,7 +193,7 @@ def move_back():
             else:
                 piece = piece[:-1]+'b'
             exec 'lamesa.'+history[pos][4]
-            output = 'lamesa.r'+piece+' -= 1'
+            output = 'lamesa.r'+piece.lower()+' -= 1'
         previous_highlight(pos)
     return output
 
