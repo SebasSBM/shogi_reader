@@ -1,3 +1,5 @@
 * Python installed in your OS
 
-* Install a library called pygame.
+* python-pygame
+
+* python-tk

@@ -2,7 +2,7 @@
 # * coding: utf-8 *
 
 """
-    Copyright (C) 2014  Sebastián Bover Mota <sebassbm.info@gmail.com>
+    Copyright (C) 2014-2016  Sebastián Bover Mota <sebassbm.info@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -65,81 +65,62 @@ def redraw():
 
 def move_forward():
     global pos, history
-    output = ''
     if pos < len(history):
-        if history[pos][2] == 2:
-            '''
-             In this case,
-              history[pos] structure -> [
-                       [kind_of_piece,counter_to_assign_id],
-                       destiny_coords,
-                       action,
-                       promoting,
-                       piece_respawn]
-            '''
-            statem  = 'lamesa.lista['+history[pos][0][0].upper()+']['
-            statem += (str)(history[pos][0][1])+']=['
-            statem += (str)(lamesa.coords_x[history[pos][1][0]])+','
-            statem += (str)(lamesa.coords_y[history[pos][1][1]])+']'
-            exec statem
-            output = 'lamesa.r'+history[pos][0][0].lower()+' -= 1'
+        if history[pos].action == 2:
+            lamesa.lista[history[pos].piece_kind][history[pos].piece_id]=[
+                         lamesa.coords_x[history[pos].coords[0]],
+                         lamesa.coords_y[history[pos].coords[1]],
+            ]
+            lamesa.r[history[pos].piece_kind] -= 1
         else:
-            # Standard case,
-            # history[pos] structure -> [
-            #        code_statement_to_select_piece,
-            #        coords_sum, action, promoting, piece_respawn]
-            statem = ('lamesa.'+history[pos][0]+'[0]+='+
-                      (str)(history[pos][1][0]*lamesa.reverted))
-            exec statem
+            lamesa.lista[history[pos].piece_kind][history[pos].piece_id][0]+=(
+                history[pos].coords[0] * lamesa.reverted
+            )
+            lamesa.lista[history[pos].piece_kind][history[pos].piece_id][1]+=(
+                history[pos].coords[1] * lamesa.reverted
+            )
 
-            statem = ('lamesa.'+history[pos][0]+'[1]+='+
-                      (str)(history[pos][1][1]*lamesa.reverted))
-            exec statem
-            if history[pos][3] == True: #Handle piece_promotion==True
-                #TODO Simplify this task avoiding the regexp abuse
-                prueba = re.match(r'^.*\[(.*)\]$', history[pos][0])
-                statem = 'prueba2=lamesa.'+history[pos][0]
-                exec statem
-                statem = 'del lamesa.'+history[pos][0]
-                exec statem
-                prueba4 = re.match(r'^.*\[(.*)\]\[.*\]$', history[pos][0])
-                statem = ('lamesa.lista[S'+prueba4.group(1)+']['+
-                            prueba.group(1)+']=['+(str)(prueba2[0])+','+
-                                                    (str)(prueba2[1])+']')
-                exec statem
+            if history[pos].promoting:
+                hold_it = lamesa.lista[history[pos].piece_kind][
+                                       history[pos].piece_id]
+                hold_kind = history[pos].piece_kind
+                hold_id = history[pos].piece_id
+                del lamesa.lista[history[pos].piece_kind][
+                                 history[pos].piece_id]
+                lamesa.lista[hold_kind+2][hold_id] = hold_it
+
 
         #Piece captured that has to be respawn backwards
-        if history[pos][4] != '':
-            # TODO Avoid regexp abuse
-            frag = re.match(r'^(lista\[(.*)\]\[.*\])=\[.*,.*\]$',
-                             history[pos][4])
-            theobj = frag.group(1)
-            piece = frag.group(2)
-            if len(piece) == 3:
-                piece = piece[1:]
-            if piece[-1] == 'b':
-                piece = piece[:-1]+'n'
+        if history[pos].respawn_kind is not None:
+            thekind = history[pos].respawn_kind
+            piece = history[pos].respawn_id
+            PROMOTED_KINDS = [SPN,SPB,SLN,SLB,SNN,SNB,SSN,SSB,STN,STB,SBN,SBB]
+            finalkind = thekind
+            if thekind in PROMOTED_KINDS:
+                finalkind -= 2
+            if thekind % 2 == 0:
+                finalkind += 1
             else:
-                piece = piece[:-1]+'b'
-            statem = 'del lamesa.'+theobj
-            exec statem
-            output = 'lamesa.r'+piece.lower()+' += 1'
+                finalkind -=1
+
+            del lamesa.lista[thekind][piece]
+            lamesa.r[finalkind] += 1
         pos += 1
         previous_highlight(pos)
-    return output
+
 
 def previous_highlight(cursor=pos):
     global history, SCREEN
-    if history[cursor-1][2] != 2:
+    if history[cursor-1].action != 2:
         if cursor > 0:
-            obj = history[cursor-1][0]
-            if history[cursor-1][3] == True:
-                frag = re.match(r'^lista\[(.*\]\[.*\])$', obj)
-                obj = 'lista[S'+frag.group(1)
-            statem = 'coords=lamesa.'+obj
-            exec statem
-            drawcoords = [coords[0]-history[cursor-1][1][0]*lamesa.reverted,
-                          coords[1]-history[cursor-1][1][1]*lamesa.reverted]
+            thekind = history[cursor-1].piece_kind
+            thepiece = history[cursor-1].piece_id
+            if history[cursor-1].promoting:
+                thekind += 2
+            coords = lamesa.lista[thekind][thepiece]
+
+            drawcoords = [coords[0]-history[cursor-1].coords[0]*lamesa.reverted,
+                          coords[1]-history[cursor-1].coords[1]*lamesa.reverted]
             pygame.draw.rect(SCREEN, (255,0,0),
                              (drawcoords[0], drawcoords[1], 70, 70))
             drawcoords = [coords[0],coords[1]]
@@ -147,55 +128,51 @@ def previous_highlight(cursor=pos):
                              (drawcoords[0], drawcoords[1], 70, 70))
     elif cursor > 0:
         pygame.draw.rect(SCREEN, (0,255,0),(
-                          lamesa.coords_x[history[cursor-1][1][0]],
-                          lamesa.coords_y[history[cursor-1][1][1]],70, 70))
+                          lamesa.coords_x[history[cursor-1].coords[0]],
+                          lamesa.coords_y[history[cursor-1].coords[1]],70, 70))
 
-            
-    
+
 def move_back():
     global pos, history
-    output = ''
     if pos > 0:
         pos -= 1
-        if history[pos][2] == 2:
-            statem = ('del lamesa.lista['+history[pos][0][0].upper()+']['+
-                       (str)(history[pos][0][1])+']')
-            exec statem
-            output = 'lamesa.r'+history[pos][0][0].lower()+' += 1'
+        if history[pos].action == 2:
+            del lamesa.lista[history[pos].piece_kind][history[pos].piece_id]
+            lamesa.r[history[pos].piece_kind] += 1
         else:
-            if history[pos][3] == True:
-                #TODO Avoid regexp abuse
-                prueba = re.match(r'^.*\[(.*)\]$', history[pos][0])
-                prueba4 = re.match(r'^.*\[(.*)\]\[.*\]$', history[pos][0])
-                statem = ('prueba2=lamesa.lista[S'+prueba4.group(1)+']['+
-                           prueba.group(1)+']')
-                exec statem
-                statem = ('lamesa.'+history[pos][0]+'=['+(str)(prueba2[0])+
-                          ','+(str)(prueba2[1])+']')
-                exec statem
-                statem = ('del lamesa.lista[S'+prueba4.group(1)+']['+
-                           prueba.group(1)+']')
-                exec statem
-            statem = ('lamesa.'+history[pos][0]+'[0]-='+
-                      (str)(history[pos][1][0]*lamesa.reverted))
-            exec statem
-            statem = ('lamesa.'+history[pos][0]+'[1]-='+
-                      (str)(history[pos][1][1]*lamesa.reverted))
-            exec statem
-        if history[pos][4] != '':
-            frag = re.match(r'^lista\[(.*)\]\[.*\]=\[.*,.*\]$',
-                            history[pos][4])
-            piece = frag.group(1)
-            if len(piece) == 3:
-                piece = piece[1:]
-            if piece[-1] == 'b':
-                piece = piece[:-1]+'n'
+            thekind = history[pos].piece_kind
+            thepiece = history[pos].piece_id
+            thecoords = history[pos].coords
+            if history[pos].promoting:
+                promo_coords = lamesa.lista[thekind+2][thepiece]
+                lamesa.lista[thekind][thepiece] = [
+                                     promo_coords[0],
+                                     promo_coords[1]
+                ]
+                del lamesa.lista[thekind+2][thepiece]
+            lamesa.lista[thekind][thepiece][0] -= (thecoords[0]
+                                                   * lamesa.reverted)
+            lamesa.lista[thekind][thepiece][1] -= (thecoords[1]
+                                                   * lamesa.reverted)
+        if history[pos].respawn_kind is not None:
+            PROMOTED_KINDS = [SPN,SPB,SLN,SLB,SNN,SNB,SSN,SSB,STN,STB,SBN,SBB]
+            thekind = history[pos].respawn_kind
+            piece = history[pos].respawn_id
+            thecoords = history[pos].respawn_coords
+            finalkind = thekind
+            if thekind in PROMOTED_KINDS:
+                finalkind -= 2
+            if thekind % 2 == 0:
+                finalkind += 1
             else:
-                piece = piece[:-1]+'b'
-            exec 'lamesa.'+history[pos][4]
-            output = 'lamesa.r'+piece.lower()+' -= 1'
+                finalkind -=1
+            # Respawn piece
+            lamesa.lista[thekind][piece]=[
+                           lamesa.coords_x[thecoords[0]],
+                           lamesa.coords_y[thecoords[1]]
+            ]
+            lamesa.r[finalkind] -= 1
         previous_highlight(pos)
-    return output
 
 def show_names():
     # *** Player names ***

@@ -2,7 +2,7 @@
 # * coding: utf-8 *
 
 """
-    Copyright (C) 2014  Sebastián Bover Mota <sebassbm.info@gmail.com>
+    Copyright (C) 2014-2016  Sebastián Bover Mota <sebassbm.info@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,14 +29,32 @@ from globales import (PN, PB, SPN, SPB, LN, LB, SLN, SLB, NN, NB, SNN,
                       SBN, SBB, GN, GB, KN, KB)
 
 
+class Move:
+    def __init__(self, piece_kind, piece_id, coords,
+                 action, promoting, piece_respawn=None):
+        self.piece_kind = piece_kind
+        self.piece_id = piece_id
+        self.coords = coords
+        self.action = action
+        self.promoting = promoting
+        self.respawn_kind = None
+        self.respawn_id = None
+        self.respawn_coords = None
+        if piece_respawn is not None:
+            self.respawn_kind = piece_respawn[0]
+            self.respawn_id = piece_respawn[1]
+            self.respawn_coords = piece_respawn[2]
+
 class coords_manager:
     def __init__(self):
         # Pieces arrays
-        self.lista = []
+        self.lista = [{},{}]
         self.cnt = []
+        self.r = []
         for i in xrange(0,26):
             self.lista.append({})
             self.cnt.append([])
+            self.r.append([])
 
         self.reverted = 1 #1 OR -1
         self.coords_ax = {
@@ -100,7 +118,7 @@ class coords_manager:
                           9:[self.coords_x['9'],self.coords_y['g']]}
         self.lista[SPN] = {}
         self.cnt[PN] = 10
-        self.rpn = 0
+        self.r[PN] = 0
         self.lista[PB] = {1:[self.coords_x['1'],self.coords_y['c']],
                           2:[self.coords_x['2'],self.coords_y['c']],
                           3:[self.coords_x['3'],self.coords_y['c']],
@@ -112,63 +130,63 @@ class coords_manager:
                           9:[self.coords_x['9'],self.coords_y['c']]}
         self.lista[SPB] = {}
         self.cnt[PB] = 10
-        self.rpb = 0
+        self.r[PB] = 0
         self.lista[LN] = {1:[self.coords_x['1'],self.coords_y['i']],
                           2:[self.coords_x['9'],self.coords_y['i']]}
         self.lista[SLN] = {}
         self.cnt[LN] = 3
-        self.rln = 0
+        self.r[LN] = 0
         self.lista[LB] = {1:[self.coords_x['1'],self.coords_y['a']],
                           2:[self.coords_x['9'],self.coords_y['a']]}
         self.lista[SLB] = {}
         self.cnt[LB] = 3
-        self.rlb = 0
+        self.r[LB] = 0
         self.lista[NN] = {1:[self.coords_x['2'],self.coords_y['i']],
                           2:[self.coords_x['8'],self.coords_y['i']]}
         self.lista[SNN] = {}
         self.cnt[NN] = 3
-        self.rnn = 0
+        self.r[NN] = 0
         self.lista[NB] = {1:[self.coords_x['2'],self.coords_y['a']],
                           2:[self.coords_x['8'],self.coords_y['a']]}
         self.lista[SNB] = {}
         self.cnt[NB] = 3
-        self.rnb = 0
+        self.r[NB] = 0
         self.lista[SN] = {1:[self.coords_x['3'],self.coords_y['i']],
                           2:[self.coords_x['7'],self.coords_y['i']]}
         self.lista[SSN] = {}
         self.cnt[SN] = 3
-        self.rsn = 0
+        self.r[SN] = 0
         self.lista[SB] = {1:[self.coords_x['3'],self.coords_y['a']],
                           2:[self.coords_x['7'],self.coords_y['a']]}
         self.lista[SSB] = {}
         self.cnt[SB] = 3
-        self.rsb = 0
+        self.r[SB] = 0
         self.lista[GN] = {1:[self.coords_x['4'],self.coords_y['i']],
                           2:[self.coords_x['6'],self.coords_y['i']]}
         self.cnt[GN] = 3
-        self.rgn = 0
+        self.r[GN] = 0
         self.lista[GB] = {1:[self.coords_x['4'],self.coords_y['a']],
                           2:[self.coords_x['6'],self.coords_y['a']]}
         self.cnt[GB] = 3
-        self.rgb = 0
+        self.r[GB] = 0
         self.lista[TN] = {1:[self.coords_x['2'],self.coords_y['h']]}
         self.lista[STN] = {}
         self.cnt[TN] = 2
-        self.rtn = 0
+        self.r[TN] = 0
         self.lista[TB] = {1:[self.coords_x['8'],self.coords_y['b']]}
         self.lista[STB] = {}
         self.cnt[TB] = 2
-        self.rtb = 0
+        self.r[TB] = 0
         self.lista[BN] = {1:[self.coords_x['8'],self.coords_y['h']]}
-        self.lista[BB] = {}
+        self.lista[SBN] = {}
         self.cnt[BN] = 2
-        self.rbn = 0
+        self.r[BN] = 0
         self.lista[BB] = {1:[self.coords_x['2'],self.coords_y['b']]}
         self.lista[SBB] = {}
         self.cnt[BB] = 2
-        self.rbb = 0
-        self.rey_n = [self.coords_x['5'],self.coords_y['i']]
-        self.rey_b = [self.coords_x['5'],self.coords_y['a']]
+        self.r[BB] = 0
+        self.lista[KN] = {1:[self.coords_x['5'],self.coords_y['i']]}
+        self.lista[KB] = {1:[self.coords_x['5'],self.coords_y['a']]}
 
     def update(self):
         if self.reverted == 1:
@@ -207,8 +225,8 @@ class coords_manager:
             for k, e in i.items():
                 i[k] = [revert_x[e[0]],revert_y[e[1]]]
 
-        self.rey_n = [revert_x[self.rey_n[0]],revert_y[self.rey_n[1]]]
-        self.rey_b = [revert_x[self.rey_b[0]],revert_y[self.rey_b[1]]]
+        #self.lista[KN] = {1:[revert_x[self.rey_n[0]],revert_y[self.rey_n[1]]]}
+        #self.lista[KB] = {1:[revert_x[self.rey_b[0]],revert_y[self.rey_b[1]]]}
         
         self.update()
 
