@@ -7,11 +7,14 @@ shogi_reader.py is a script that uses pygame to convert Shogi Western Notation i
 
 This program goal is to read shogi games saved in plain text using Western Shogi Game Notation (see http://japanesechess.org/notation/shogi_notation.html for more details) and use that information to replay every move forwards and backwards. It is a prototype, but it works. You switch to the next move pressing D, and to the previous pressing A. Now you can also rotate the board 180º pressing R key.
 
+I want to give special thanks to @200_success♦ and @jonrsharpe, who helped me through codereview.stackexchange.com to see the modelling lacks of the software's whole structure and gave me awesome pointers to improve the source code. http://codereview.stackexchange.com/questions/96707/class-modelling-for-a-shogi-notation-reader
+
 ### REQUIREMENTS ###
 This software is made with Python and uses the Pygame library to work, so, your OS needs to have:
 
 - Python installed (usually, Linux based OS have Python installed by default, but there may be exceptions).
 - Pygame library installed.
+- Package python-tkinter
 
 Global variables have been implemented to grant that the software will find the sprites properly no matter where the Shogi Reader is executed from.
 
@@ -65,7 +68,7 @@ I will slowly improve some of these things and more when I have some spare time,
 
   Basic exception handling has already been implemented, but there are some potential exceptions that are not handled yet. Some of the exceptions pending of being created and/or handled are:
   
-- Making sure that the piece can perform the move without breaking any shogi rule- as explained at point 2.
+- Making sure that the piece can perform the move without breaking any shogi rule- as explained at point 1.
 - Reverted Notation automatic handling, as explained below.
 - Some other potential exceptions that I haven't figured out yet.
 

@@ -36,24 +36,13 @@ import re
 
 pygame.init()
 from pygame.locals import *
-from managers import *
+
+from managers import MatrixManager, SpritesManager, Move
 from globales import *
 from globalvars import history, lamesa, partida, rawgame, game_data
 from funciones import redraw
 
 #reloj = pygame.time.Clock()
-
-pygame.display.set_caption("ShogiReader - Reproductor de partidas grabadas")
-
-# *** POSITIONS TABLE and Pieces arrays ***
-matrix = matrix_manager()
-
-# *** Load input file ***
-movs = game_data.movs.splitlines()
-
-partida.close()
-redraw()
-
 
 ### Positions sheet
 #
@@ -65,8 +54,21 @@ redraw()
 ###
 #
 
-# *** ALGORITHM TO READ NOTATION AND TRANSFORM IT INTO DATA EXECUTABLE FORWARD AND BACKWARDS ***
+"""
+    ALGORITHM TO READ NOTATION AND TRANSFORM IT INTO DATA EXECUTABLE
+    FORWARD AND BACKWARDS
+"""
 
+pygame.display.set_caption("ShogiReader - Reproductor de partidas grabadas")
+
+# *** POSITIONS TABLE and Pieces arrays ***
+matrix = MatrixManager()
+
+# *** Load input file ***
+movs = game_data.movs.splitlines()
+
+partida.close()
+redraw()
 reg = re.compile(r"""^\s*(?P<move_num>\d+)
                      \s*-\s*(?P<piece>\+?[PLNSGKRB])(?P<from>\d[a-i])?
                      (?P<action>[-x*])
@@ -78,7 +80,7 @@ for move in movs:
     move_to_add = None
     action = None
     promoting = False
-    piece_respawn = None
+    piece_respawn = [None,None,None]
     piece_x = 0
     piece_y = 0
     frag = reg.match(move)
@@ -101,301 +103,31 @@ for move in movs:
         action = 2
     elif action_g == '-':
         action = 0
+    sente = int(num_g) % 2 == 1
 
+    # Create respawn data for captured piece
     if action == 1:
-        piece_respawn = [None,None,None]
-        if int(num_g) % 2 == 1: #Negras
-            found = False
-            while not found:
-                for k, e in lamesa.lista[PB].items():
+        PROMOTED_KINDS = [SPN,SPB,SLN,SLB,SNN,SNB,SSN,SSB,STN,STB,SBN,SBB]
+        found = False
+        while not found:
+            for sho in xrange(0,27):
+                for k, e in lamesa.lista[sho].items():
                     if e == destiny:
-                        del lamesa.lista[PB][k]
-                        lamesa.r[PN] += 1
-                        piece_respawn[0] = PB
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[SPB].items():
-                    if e == destiny:
-                        del lamesa.lista[SPB][k]
-                        lamesa.r[PN] += 1
-                        piece_respawn[0] = SPB
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[LB].items():
-                    if e == destiny:
-                        del lamesa.lista[LB][k]
-                        lamesa.r[LN] += 1
-                        piece_respawn[0] = LB
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[SLB].items():
-                    if e == destiny:
-                        del lamesa.lista[SLB][k]
-                        lamesa.r[LN] += 1
-                        piece_respawn[0] = SLB
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[NB].items():
-                    if e == destiny:
-                        del lamesa.lista[NB][k]
-                        lamesa.r[NN] += 1
-                        piece_respawn[0] = NB
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[SNB].items():
-                    if e == destiny:
-                        del lamesa.lista[SNB][k]
-                        lamesa.r[NN] += 1
-                        piece_respawn[0] = SNB
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[SB].items():
-                    if e == destiny:
-                        del lamesa.lista[SB][k]
-                        lamesa.r[SN] += 1
-                        piece_respawn[0] = SB
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[SSB].items():
-                    if e == destiny:
-                        del lamesa.lista[SSB][k]
-                        lamesa.r[SN] += 1
-                        piece_respawn[0] = SSB
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[GB].items():
-                    if e == destiny:
-                        del lamesa.lista[GB][k]
-                        lamesa.r[GN] += 1
-                        piece_respawn[0] = GB
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[TB].items():
-                    if e == destiny:
-                        del lamesa.lista[TB][k]
-                        lamesa.r[TN] += 1
-                        piece_respawn[0] = TB
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[STB].items():
-                    if e == destiny:
-                        del lamesa.lista[STB][k]
-                        lamesa.r[TN] += 1
-                        piece_respawn[0] = STB
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[BB].items():
-                    if e == destiny:
-                        del lamesa.lista[BB][k]
-                        lamesa.r[BN] += 1
-                        piece_respawn[0] = BB
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[SBB].items():
-                    if e == destiny:
-                        del lamesa.lista[SBB][k]
-                        lamesa.r[BN] += 1
-                        piece_respawn[0] = SBB
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-        else: # Blancas
-            found = False
-            while not found:
-                for k, e in lamesa.lista[PN].items():
-                    if e == destiny:
-                        del lamesa.lista[PN][k]
-                        lamesa.r[PB] += 1
-                        piece_respawn[0] = PN
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[SPN].items():
-                    if e == destiny:
-                        del lamesa.lista[SPN][k]
-                        lamesa.r[PB] += 1
-                        piece_respawn[0] = SPN
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[LN].items():
-                    if e == destiny:
-                        del lamesa.lista[LN][k]
-                        lamesa.r[LB] += 1
-                        piece_respawn[0] = LN
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[SLN].items():
-                    if e == destiny:
-                        del lamesa.lista[SLN][k]
-                        lamesa.r[LB] += 1
-                        piece_respawn[0] = SLN
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[NN].items():
-                    if e == destiny:
-                        del lamesa.lista[NN][k]
-                        lamesa.r[NB] += 1
-                        piece_respawn[0] = NN
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[SNN].items():
-                    if e == destiny:
-                        del lamesa.lista[SNN][k]
-                        lamesa.r[NB] += 1
-                        piece_respawn[0] = SNN
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[SN].items():
-                    if e == destiny:
-                        del lamesa.lista[SN][k]
-                        lamesa.r[SB] += 1
-                        piece_respawn[0] = SN
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[SSN].items():
-                    if e == destiny:
-                        del lamesa.lista[SSN][k]
-                        lamesa.r[SB] += 1
-                        piece_respawn[0] = SSN
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[GN].items():
-                    if e == destiny:
-                        del lamesa.lista[GN][k]
-                        lamesa.r[GB] += 1
-                        piece_respawn[0] = GN
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[TN].items():
-                    if e == destiny:
-                        del lamesa.lista[TN][k]
-                        lamesa.r[TB] += 1
-                        piece_respawn[0] = TN
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[STN].items():
-                    if e == destiny:
-                        del lamesa.lista[STN][k]
-                        lamesa.r[TB] += 1
-                        piece_respawn[0] = STN
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[BN].items():
-                    if e == destiny:
-                        del lamesa.lista[BN][k]
-                        lamesa.r[BB] += 1
-                        piece_respawn[0] = BN
-                        piece_respawn[1] = k
-                        piece_respawn[2] = [destiny_h[0], destiny_h[1]]
-                        found = True
-                        break
-                if found:
-                     break
-                for k, e in lamesa.lista[SBN].items():
-                    if e == destiny:
-                        del lamesa.lista[SBN][k]
-                        lamesa.r[BB] += 1
-                        piece_respawn[0] = SBN
+                        del lamesa.lista[sho][k]
+                        fres = (sho if not sho in
+                                 PROMOTED_KINDS else sho - 2)
+                        fres += -1 if sente else 1
+                        lamesa.r[fres] += 1
+                        piece_respawn[0] = sho
                         piece_respawn[1] = k
                         piece_respawn[2] = [destiny_h[0], destiny_h[1]]
                         found = True
                         break
 
     possible_moves = 0
+    # Case: starting coords of piece not provided
     if piece_x == 0 and action != 2:
-        if int(num_g) % 2 == 1: #Negras
+        if sente: #Negras
             if kind == 'P':
                 for k, pn in lamesa.lista[PN].items():
                     if destiny[0] == pn[0] and destiny[1] == pn[1]-71:
@@ -413,7 +145,7 @@ for move in movs:
             if kind == 'L':
                 for k, ln in lamesa.lista[LN].items():
                     if destiny[0] == ln[0] and destiny[1] < ln[1]:
-                        if matrix.check_ln(matrix.get_hcoords(ln), destiny_h):
+                        if matrix.check(LN, matrix.get_hcoords(ln), destiny_h):
                             possible_moves += 1
                             move_to_add = Move(LN, k, [0,destiny[1]-ln[1]],
                                           action, promoting, piece_respawn)
@@ -498,7 +230,7 @@ for move in movs:
             if kind == 'R':
                 for k, tn in lamesa.lista[TN].items():
                     if (destiny[0] == tn[0]) != (destiny[1] == tn[1]):
-                        if matrix.check_t(matrix.get_hcoords(tn), destiny_h):
+                        if matrix.check(TN, matrix.get_hcoords(tn), destiny_h):
                             possible_moves += 1
                             move_to_add = Move(TN, k, [destiny[0]-tn[0],
                                                destiny[1]-tn[1]], action,
@@ -518,7 +250,7 @@ for move in movs:
                             stn[0]-71 and destiny[1] <= stn[1]+71 and
                             destiny[1] >= stn[1]-71):
                         if ((destiny[0] == stn[0]) != (destiny[1] ==
-                                  stn[1]) and matrix.check_t(
+                                  stn[1]) and matrix.check(STN,
                                         matrix.get_hcoords(stn),
                                         destiny_h)) or not((destiny[0] ==
                                    stn[0]) != (destiny[1] == stn[1])):
@@ -534,7 +266,7 @@ for move in movs:
             if kind == 'B':
                 for k, bn in lamesa.lista[BN].items():
                     if abs(destiny[0]-bn[0]) == abs(destiny[1]-bn[1]):
-                        if matrix.check_b(matrix.get_hcoords(bn), destiny_h):
+                        if matrix.check(BN, matrix.get_hcoords(bn), destiny_h):
                             possible_moves += 1
                             move_to_add = Move(BN, k, [destiny[0]-bn[0],
                                                destiny[1]-bn[1]], action,
@@ -554,7 +286,7 @@ for move in movs:
                            sbn[0]-71 and destiny[1] <= sbn[1]+71 and
                            destiny[1] >= sbn[1]-71):
                         if ((abs(destiny[0]-sbn[0]) == abs(destiny[1]-sbn[1])
-                            ) and matrix.check_b(matrix.get_hcoords(sbn),
+                            ) and matrix.check(SBN, matrix.get_hcoords(sbn),
                               destiny_h)) or not (abs(destiny[0]-sbn[0]) ==
                                 abs(destiny[1]-sbn[1])):
                             possible_moves += 1
@@ -596,7 +328,7 @@ for move in movs:
             if kind == 'L':
                 for k, lb in lamesa.lista[LB].items():
                     if destiny[0] == lb[0] and destiny[1] > lb[1]:
-                        if matrix.check_lb(matrix.get_hcoords(lb), destiny_h):
+                        if matrix.check(LB, matrix.get_hcoords(lb), destiny_h):
                             possible_moves += 1
                             move_to_add = Move(LB, k, [0, destiny[1]-lb[1]],
                                                action, promoting, piece_respawn)
@@ -681,7 +413,7 @@ for move in movs:
             if kind == 'R':
                 for k, tb in lamesa.lista[TB].items():
                     if (destiny[0] == tb[0]) != (destiny[1] == tb[1]):
-                        if matrix.check_t(matrix.get_hcoords(tb),destiny_h):
+                        if matrix.check(TB, matrix.get_hcoords(tb),destiny_h):
                             possible_moves += 1
                             move_to_add = Move(TB, k, [destiny[0]-tb[0],
                                                destiny[1]-tb[1]], action,
@@ -701,7 +433,7 @@ for move in movs:
                             stb[0]-71 and destiny[1] <= stb[1]+71 and
                             destiny[1] >= stb[1]-71):
                         if ((destiny[0] == stb[0]) != (destiny[1] ==
-                                  stb[1]) and matrix.check_t(
+                                  stb[1]) and matrix.check(STB,
                                         matrix.get_hcoords(stb),
                                         destiny_h)) or not((destiny[0] ==
                                    stb[0]) != (destiny[1] == stb[1])):
@@ -717,7 +449,7 @@ for move in movs:
             if kind == 'B':
                 for k, bb in lamesa.lista[BB].items():
                     if abs(destiny[0]-bb[0]) == abs(destiny[1]-bb[1]):
-                        if matrix.check_b(matrix.get_hcoords(bb), destiny_h):
+                        if matrix.check(BB, matrix.get_hcoords(bb), destiny_h):
                             possible_moves += 1
                             move_to_add = Move(BB, k, [destiny[0]-bb[0],
                                                destiny[1]-bb[1]], action,
@@ -737,7 +469,7 @@ for move in movs:
                            sbb[0]-71 and destiny[1] <= sbb[1]+71 and
                            destiny[1] >= sbb[1]-71):
                         if ((abs(destiny[0]-sbb[0]) == abs(destiny[1]-sbb[1])
-                            ) and matrix.check_b(matrix.get_hcoords(sbb),
+                            ) and matrix.check(SBB, matrix.get_hcoords(sbb),
                               destiny_h)) or not (abs(destiny[0]-sbb[0]) ==
                                 abs(destiny[1]-sbb[1])):
                             possible_moves += 1
@@ -761,8 +493,9 @@ for move in movs:
                     matrix.empty(matrix.get_hcoords(lamesa.lista[KB][1]))
                     lamesa.lista[KB][1] = destiny
                     matrix.fill(destiny_h)
+    # Case: initial piece coords provided AND it's not a drop
     elif action != 2:
-        if int(num_g) % 2 == 1: #Negras
+        if sente: #Negras
             if kind == 'P':
                 for k, pn in lamesa.lista[PN].items():
                     if pn[0] == piece_x and pn[1] == piece_y:
@@ -780,7 +513,7 @@ for move in movs:
             if kind == 'L':
                 for k, ln in lamesa.lista[LN].items():
                     if ln[0] == piece_x and ln[1] == piece_y:
-                        if matrix.check_ln(matrix.get_hcoords(ln), destiny_h):
+                        if matrix.check(LN, matrix.get_hcoords(ln), destiny_h):
                             move_to_add = Move(LN, k, [0,destiny[1]-ln[1]],
                                                action, promoting, piece_respawn)
                             matrix.empty(
@@ -850,7 +583,7 @@ for move in movs:
             if kind == 'R':
                 for k, tn in lamesa.lista[TN].items():
                     if tn[0] == piece_x and tn[1] == piece_y:
-                        if matrix.check_t(matrix.get_hcoords(tn), destiny_h):
+                        if matrix.check(TN, matrix.get_hcoords(tn), destiny_h):
                             move_to_add = Move(TN, k, [destiny[0]-tn[0],
                                                destiny[1]-tn[1]], action,
                                                promoting, piece_respawn)
@@ -867,7 +600,7 @@ for move in movs:
                 for k, stn in lamesa.lista[STN].items():
                     if stn[0] == piece_x and stn[1] == piece_y:
                         if ((destiny[0] == stn[0]) != (destiny[1] == stn[1]
-                            ) and matrix.check_t(matrix.get_hcoords(stn),
+                            ) and matrix.check(STN, matrix.get_hcoords(stn),
                               destiny_h)) or not ((destiny[0] == stn[0]) != (
                                 destiny[1] == stn[1])):
                             move_to_add = Move(STN, k, [destiny[0]-stn[0],
@@ -882,7 +615,7 @@ for move in movs:
             if kind == 'B':
                 for k, bn in lamesa.lista[BN].items():
                     if bn[0] == piece_x and bn[1] == piece_y:
-                        if matrix.check_b(matrix.get_hcoords(bn),destiny_h):
+                        if matrix.check(BN, matrix.get_hcoords(bn),destiny_h):
                             move_to_add = Move(BN, k, [destiny[0]-bn[0],
                                                destiny[1]-bn[1]], action,
                                                promoting, piece_respawn)
@@ -899,7 +632,7 @@ for move in movs:
                 for k, sbn in lamesa.lista[SBN].items():
                     if sbn[0] == piece_x and sbn[1] == piece_y:
                         if ((abs(destiny[0]-sbn[0]) == abs(destiny[1]-sbn[1])
-                            ) and matrix.check_b(matrix.get_hcoords(sbn),
+                            ) and matrix.check(SBN, matrix.get_hcoords(sbn),
                                 destiny_h)) or not (abs(destiny[0]-sbn[0]
                                 ) == abs(destiny[1]-sbn[1])):
                             move_to_add = Move(SBN, k, [destiny[0]-sbn[0],
@@ -939,7 +672,7 @@ for move in movs:
             if kind == 'L':
                 for k, lb in lamesa.lista[LB].items():
                     if lb[0] == piece_x and lb[1] == piece_y:
-                        if matrix.check_lb(matrix.get_hcoords(lb), destiny_h):
+                        if matrix.check(LB, matrix.get_hcoords(lb), destiny_h):
                             move_to_add = Move(LB, k, [0,destiny[1]-lb[1]],
                                                action, promoting, piece_respawn)
                             matrix.empty(
@@ -1009,7 +742,7 @@ for move in movs:
             if kind == 'R':
                 for k, tb in lamesa.lista[TB].items():
                     if tb[0] == piece_x and tb[1] == piece_y:
-                        if matrix.check_t(matrix.get_hcoords(tb),destiny_h):
+                        if matrix.check(TB, matrix.get_hcoords(tb),destiny_h):
                             move_to_add = Move(TB, k, [destiny[0]-tb[0],
                                                destiny[1]-tb[1]], action,
                                                promoting, piece_respawn)
@@ -1026,7 +759,7 @@ for move in movs:
                 for k, stb in lamesa.lista[STB].items():
                     if stb[0] == piece_x and stb[1] == piece_y:
                         if ((destiny[0] == stb[0]) != (destiny[1] == stb[1]
-                            ) and matrix.check_t(matrix.get_hcoords(stb),
+                            ) and matrix.check(STB, matrix.get_hcoords(stb),
                               destiny_h)) or not ((destiny[0] == stb[0]) != (
                                 destiny[1] == stb[1])):
                             move_to_add = Move(STB, k, [destiny[0]-stb[0],
@@ -1041,7 +774,7 @@ for move in movs:
             if kind == 'B':
                 for k, bb in lamesa.lista[BB].items():
                     if bb[0] == piece_x and bb[1] == piece_y:
-                        if matrix.check_b(matrix.get_hcoords(bb),destiny_h):
+                        if matrix.check(BB, matrix.get_hcoords(bb),destiny_h):
                             move_to_add = Move(BB, k, [destiny[0]-bb[0],
                                                destiny[1]-bb[1]], action,
                                                promoting, piece_respawn)
@@ -1058,7 +791,7 @@ for move in movs:
                 for k, sbb in lamesa.lista[SBB].items():
                     if sbb[0] == piece_x and sbb[1] == piece_y:
                         if ((abs(destiny[0]-sbb[0]) == abs(destiny[1]-sbb[1])
-                            ) and matrix.check_b(matrix.get_hcoords(sbb),
+                            ) and matrix.check(SBB, matrix.get_hcoords(sbb),
                                 destiny_h) == True) or not(abs(destiny[0]-sbb[0]
                                 ) == abs(destiny[1]-sbb[1])):
                             move_to_add = Move(SBB, k, [destiny[0]-sbb[0],
@@ -1081,103 +814,24 @@ for move in movs:
                     lamesa.lista[KB][1] = destiny
                     matrix.fill(destiny_h)
     else: # Action=2 (piece drop)
-        if int(num_g) % 2 == 1: #Negras
+        NORMAL_KINDS = [PN,PB,LN,LB,NN,NB,SN,SB,GN,GB,TN,TB,BN,BB]
+        CONVERT_KIND = { 'Pn': PN, 'Pb': PB,
+                         'Ln': LN, 'Lb': LB,
+                         'Nn': NN, 'Nb': NB,
+                         'Sn': SN, 'Sb': SB,
+                         'Gn': GN, 'Gb': GB,
+                         'Rn': TN, 'Rb': TB,
+                         'Bn': BN, 'Bb': BB }
+        if sente: #Negras
             player = 'n'
         else:
             player = 'b'
-
-        if kind == 'P':
-            if player == 'n':
-                move_to_add = Move(PN, lamesa.cnt[PN], destiny_h,
-                                   action, promoting, piece_respawn)
-                lamesa.lista[PN][lamesa.cnt[PN]] = destiny
-                lamesa.cnt[PN] += 1
-                lamesa.r[PN] -= 1
-            else:
-                move_to_add = Move(PB, lamesa.cnt[PB], destiny_h,
-                                   action, promoting, piece_respawn)
-                lamesa.lista[PB][lamesa.cnt[PB]] = destiny
-                lamesa.cnt[PB] += 1
-                lamesa.r[PB] -= 1
-        if kind == 'L':
-            if player == 'n':
-                move_to_add = Move(LN, lamesa.cnt[LN], destiny_h,
-                                   action, promoting, piece_respawn)
-                lamesa.lista[LN][lamesa.cnt[LN]] = destiny
-                lamesa.cnt[LN] += 1
-                lamesa.r[LN] -= 1
-            else:
-                move_to_add = Move(LB, lamesa.cnt[LB], destiny_h,
-                                   action, promoting, piece_respawn)
-                lamesa.lista[LB][lamesa.cnt[LB]] = destiny
-                lamesa.cnt[LB] += 1
-                lamesa.r[LB] -= 1
-        if kind == 'N':
-            if player == 'n':
-                move_to_add = Move(NN, lamesa.cnt[NN], destiny_h,
-                                   action, promoting, piece_respawn)
-                lamesa.lista[NN][lamesa.cnt[NN]] = destiny
-                lamesa.cnt[NN] += 1
-                lamesa.r[NN] -= 1
-            else:
-                move_to_add = Move(NB, lamesa.cnt[NB], destiny_h,
-                                   action, promoting, piece_respawn)
-                lamesa.lista[NB][lamesa.cnt[NB]] = destiny
-                lamesa.cnt[NB] += 1
-                lamesa.r[NB] -= 1
-        if kind == 'S':
-            if player == 'n':
-                move_to_add = Move(SN, lamesa.cnt[SN], destiny_h,
-                                   action, promoting, piece_respawn)
-                lamesa.lista[SN][lamesa.cnt[SN]] = destiny
-                lamesa.cnt[SN] += 1
-                lamesa.r[SN] -= 1
-            else:
-                move_to_add = Move(SB, lamesa.cnt[SB], destiny_h,
-                                   action, promoting, piece_respawn)
-                lamesa.lista[SB][lamesa.cnt[SB]] = destiny
-                lamesa.cnt[SB] += 1
-                lamesa.r[SB] -= 1
-        if kind == 'G':
-            if player == 'n':
-                move_to_add = Move(GN, lamesa.cnt[GN], destiny_h,
-                                   action, promoting, piece_respawn)
-                lamesa.lista[GN][lamesa.cnt[GN]] = destiny
-                lamesa.cnt[GN] += 1
-                lamesa.r[GN] -= 1
-            else:
-                move_to_add = Move(GB, lamesa.cnt[GB], destiny_h,
-                                   action, promoting, piece_respawn)
-                lamesa.lista[GB][lamesa.cnt[GB]] = destiny
-                lamesa.cnt[GB] += 1
-                lamesa.r[GB] -= 1
-        if kind == 'R':
-            if player == 'n':
-                move_to_add = Move(TN, lamesa.cnt[TN], destiny_h,
-                                   action, promoting, piece_respawn)
-                lamesa.lista[TN][lamesa.cnt[TN]] = destiny
-                lamesa.cnt[TN] += 1
-                lamesa.r[TN] -= 1
-            else:
-                move_to_add = Move(TB, lamesa.cnt[TB], destiny_h,
-                                   action, promoting, piece_respawn)
-                lamesa.lista[TB][lamesa.cnt[TB]] = destiny
-                lamesa.cnt[TB] += 1
-                lamesa.r[TB] -= 1
-        if kind == 'B':
-            if player == 'n':
-                move_to_add = Move(BN, lamesa.cnt[BN], destiny_h,
-                                   action, promoting, piece_respawn)
-                lamesa.lista[BN][lamesa.cnt[BN]] = destiny
-                lamesa.cnt[BN] += 1
-                lamesa.r[BN] -= 1
-            else:
-                move_to_add = Move(BB, lamesa.cnt[BB], destiny_h,
-                                   action, promoting, piece_respawn)
-                lamesa.lista[BB][lamesa.cnt[BB]] = destiny
-                lamesa.cnt[BB] += 1
-                lamesa.r[BB] -= 1
-        matrix.fill(destiny_h)
+        dry = CONVERT_KIND[kind+player]
+        move_to_add = Move(dry, lamesa.cnt[dry], destiny_h,
+                           action, promoting, piece_respawn)
+        lamesa.lista[dry][lamesa.cnt[dry]] = destiny
+        lamesa.cnt[dry] += 1
+        lamesa.r[dry] -= 1
 
     # TODO Check legal move -> not perfect yet
     if move_to_add != None:
@@ -1205,7 +859,7 @@ for move in movs:
         
 # *** From here, the history array is full of Move instances.
 # *** So we restart the board(lamesa) to start drawing with pygame
-sprites = sprites_manager()
+sprites = SpritesManager()
 max_history = len(history)
 from funciones import (move_forward, previous_highlight, move_back,
                        show_names, get_pos)
@@ -1219,6 +873,26 @@ cnt_bw = 0
 hold_fw = False
 hold_bw = False
 delay = 10
+
+# Captured pieces positioning
+RES_UP = {
+    0:(25,21),
+    4:(25,92),
+    8:(136,92),
+    12:(25,163),
+    24:(136,163),
+    16:(25,234),
+    20:(116,234)
+}
+RES_DOWN = {
+    0:(940,375),
+    4:(940,446),
+    8:(1051,446),
+    12:(940,517),
+    24:(1051,517),
+    16:(940,588),
+    20:(1031,588)
+}
 
 # Main loop to blit on the screen
 while True:
@@ -1283,137 +957,35 @@ while True:
 #    pygame.draw.line(SCREEN, (0,0,0), (20,20), (mx,my))
 
     # *** Captured pieces display ***
-    res_up = {
-        'p':(25,21),
-        'l':(25,92),
-        'n':(136,92),
-        's':(25,163),
-        'g':(136,163),
-        't':(25,234),
-        'b':(116,234)
-    }
-    res_down = {
-        'p':(940,375),
-        'l':(940,446),
-        'n':(1051,446),
-        's':(940,517),
-        'g':(1051,517),
-        't':(940,588),
-        'b':(1031,588)
-    }
     if lamesa.reverted == 1:
-        res_n = res_down
-        res_b = res_up
+        res_n = RES_DOWN
+        res_b = RES_UP
     else:
-        res_b = res_down
-        res_n = res_up
+        res_b = RES_DOWN
+        res_n = RES_UP
 
-    for i in xrange(0, lamesa.r[PN]):
-        mod = i * 10
-        SCREEN.blit(sprites.imgs[PN], (res_n['p'][0]+mod, res_n['p'][1]))
-    for i in xrange(0, lamesa.r[PB]):
-        mod = i * 10
-        SCREEN.blit(sprites.imgs[PB], (res_b['p'][0]+mod, res_b['p'][1]))
-    for i in xrange(0, lamesa.r[LN]):
-        mod = i * 10
-        SCREEN.blit(sprites.imgs[LN], (res_n['l'][0]+mod, res_n['l'][1]))
-    for i in xrange(0, lamesa.r[LB]):
-        mod = i * 10
-        SCREEN.blit(sprites.imgs[LB], (res_b['l'][0]+mod, res_b['l'][1]))
-    for i in xrange(0, lamesa.r[NN]):
-        mod = i * 10
-        SCREEN.blit(sprites.imgs[NN], (res_n['n'][0]+mod, res_n['n'][1]))
-    for i in xrange(0, lamesa.r[NB]):
-        mod = i * 10
-        SCREEN.blit(sprites.imgs[NB], (res_b['n'][0]+mod, res_b['n'][1]))
-    for i in xrange(0, lamesa.r[SN]):
-        mod = i * 10
-        SCREEN.blit(sprites.imgs[SN], (res_n['s'][0]+mod, res_n['s'][1]))
-    for i in xrange(0, lamesa.r[SB]):
-        mod = i * 10
-        SCREEN.blit(sprites.imgs[SB], (res_b['s'][0]+mod, res_b['s'][1]))
-    for i in xrange(0, lamesa.r[GN]):
-        mod = i * 10
-        SCREEN.blit(sprites.imgs[GN], (res_n['g'][0]+mod, res_n['g'][1]))
-    for i in xrange(0, lamesa.r[GB]):
-        mod = i * 10
-        SCREEN.blit(sprites.imgs[GB], (res_b['g'][0]+mod, res_b['g'][1]))
-    for i in xrange(0, lamesa.r[TN]):
-        mod = i * 10
-        SCREEN.blit(sprites.imgs[TN], (res_n['t'][0]+mod, res_n['t'][1]))
-    for i in xrange(0, lamesa.r[TB]):
-        mod = i * 10
-        SCREEN.blit(sprites.imgs[TB], (res_b['t'][0]+mod, res_b['t'][1]))
-    for i in xrange(0, lamesa.r[BN]):
-        mod = i * 10
-        SCREEN.blit(sprites.imgs[BN], (res_n['b'][0]+mod, res_n['b'][1]))
-    for i in xrange(0, lamesa.r[BB]):
-        mod = i * 10
-        SCREEN.blit(sprites.imgs[BB], (res_b['b'][0]+mod, res_b['b'][1]))
+    # Blit captured pieces
+    kinds = [PN,PB,LN,LB,NN,NB,SN,SB,GN,GB,TN,TB,BN,BB]
+    for kind in kinds:
+        res = res_n if kind % 2 == 0 else res_b
+        ri = kind - 1 if kind % 2 == 1 else kind
+        for i in xrange(0, lamesa.r[kind]):
+            mod = i * 10
+            SCREEN.blit(sprites.imgs[kind], (res[ri][0]+mod, res[ri][1]))
 
-    # *** This reads the current position of pieces to place them ***
+
     if lamesa.reverted == 1:
         comp_b = 2
         comp_n = 0
     else:
         comp_n = 2
         comp_b = 0
-    for k, pn in lamesa.lista[PN].items():
-        SCREEN.blit(sprites.imgs[PN], (pn[0]-comp_n, pn[1]-comp_n))
-    for k, spn in lamesa.lista[SPN].items():
-        SCREEN.blit(sprites.imgs[SPN], (spn[0]-comp_n, spn[1]-comp_n))
-    for k, pb in lamesa.lista[PB].items():
-        SCREEN.blit(sprites.imgs[PB], (pb[0]-comp_b, pb[1]-comp_b))
-    for k, spb in lamesa.lista[SPB].items():
-        SCREEN.blit(sprites.imgs[SPB], (spb[0]-comp_b, spb[1]-comp_b))
-    for k, ln in lamesa.lista[LN].items():
-        SCREEN.blit(sprites.imgs[LN], (ln[0]-comp_n, ln[1]-comp_n))
-    for k, sln in lamesa.lista[SLN].items():
-        SCREEN.blit(sprites.imgs[SLN], (sln[0]-comp_n, sln[1]-comp_n))
-    for k, lb in lamesa.lista[LB].items():
-        SCREEN.blit(sprites.imgs[LB], (lb[0]-comp_b, lb[1]-comp_b))
-    for k, slb in lamesa.lista[SLB].items():
-        SCREEN.blit(sprites.imgs[SLB], (slb[0]-comp_b, slb[1]-comp_b))
-    for k, nn in lamesa.lista[NN].items():
-        SCREEN.blit(sprites.imgs[NN], (nn[0]-comp_n, nn[1]-comp_n))
-    for k, snn in lamesa.lista[SNN].items():
-        SCREEN.blit(sprites.imgs[SNN], (snn[0]-comp_n, snn[1]-comp_n))
-    for k, nb in lamesa.lista[NB].items():
-        SCREEN.blit(sprites.imgs[NB], (nb[0]-comp_b, nb[1]-comp_b))
-    for k, snb in lamesa.lista[SNB].items():
-        SCREEN.blit(sprites.imgs[SNB], (snb[0]-comp_b, snb[1]-comp_b))
-    for k, sn in lamesa.lista[SN].items():
-        SCREEN.blit(sprites.imgs[SN], (sn[0]-comp_n, sn[1]-comp_n))
-    for k, ssn in lamesa.lista[SSN].items():
-        SCREEN.blit(sprites.imgs[SSN], (ssn[0]-comp_n, ssn[1]-comp_n))
-    for k, sb in lamesa.lista[SB].items():
-        SCREEN.blit(sprites.imgs[SB], (sb[0]-comp_b, sb[1]-comp_b))
-    for k, ssb in lamesa.lista[SSB].items():
-        SCREEN.blit(sprites.imgs[SSB], (ssb[0]-comp_b, ssb[1]-comp_b))
-    for k, gn in lamesa.lista[GN].items():
-        SCREEN.blit(sprites.imgs[GN], (gn[0]-comp_n, gn[1]-comp_n))
-    for k, gb in lamesa.lista[GB].items():
-        SCREEN.blit(sprites.imgs[GB], (gb[0]-comp_b, gb[1]-comp_b))
-    for k, tn in lamesa.lista[TN].items():
-        SCREEN.blit(sprites.imgs[TN], (tn[0]-comp_n, tn[1]-comp_n))
-    for k, stn in lamesa.lista[STN].items():
-        SCREEN.blit(sprites.imgs[STN], (stn[0]-comp_n, stn[1]-comp_n))
-    for k, tb in lamesa.lista[TB].items():
-        SCREEN.blit(sprites.imgs[TB], (tb[0]-comp_b, tb[1]-comp_b))
-    for k, stb in lamesa.lista[STB].items():
-        SCREEN.blit(sprites.imgs[STB], (stb[0]-comp_b, stb[1]-comp_b))
-    for k, bn in lamesa.lista[BN].items():
-        SCREEN.blit(sprites.imgs[BN], (bn[0]-comp_n, bn[1]-comp_n))
-    for k, sbn in lamesa.lista[SBN].items():
-        SCREEN.blit(sprites.imgs[SBN], (sbn[0]-comp_n, sbn[1]-comp_n))
-    for k, bb in lamesa.lista[BB].items():
-        SCREEN.blit(sprites.imgs[BB], (bb[0]-comp_b, bb[1]-comp_b))
-    for k, sbb in lamesa.lista[SBB].items():
-        SCREEN.blit(sprites.imgs[SBB], (sbb[0]-comp_b, sbb[1]-comp_b))
-    SCREEN.blit(sprites.imgs[KN],
-                (lamesa.lista[KN][1][0]-comp_n, lamesa.lista[KN][1][1]-comp_n))
-    SCREEN.blit(sprites.imgs[KB],
-                (lamesa.lista[KB][1][0]-comp_b, lamesa.lista[KB][1][1]-comp_b))
+
+    # Blit in-board pieces
+    for kind in xrange(0,28):
+        comp = comp_n if kind % 2 == 0 else comp_b
+        for k, piece in lamesa.lista[kind].items():
+            SCREEN.blit(sprites.imgs[kind], (piece[0]-comp, piece[1]-comp))
 
 #    reloj.tick(10)
     pygame.display.flip()

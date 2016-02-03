@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # * coding: utf-8 *
 
-from managers import coords_manager, input_manager
+from managers import CoordsManager, InputManager
 
 # *** Global variables ***
 history = []
 pos = 0
-lamesa = coords_manager()
+lamesa = CoordsManager()
 
 import Tkinter, tkFileDialog
 
@@ -19,5 +19,5 @@ if file_path == '':
 partida = open(file_path, 'r')
 
 rawgame = partida.read()
-game_data = input_manager(rawgame)
+game_data = InputManager(rawgame)
 

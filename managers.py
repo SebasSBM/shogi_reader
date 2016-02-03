@@ -29,6 +29,10 @@ from globales import (PN, PB, SPN, SPB, LN, LB, SLN, SLB, NN, NB, SNN,
                       SBN, SBB, GN, GB, KN, KB)
 
 
+"""
+    Instances of this class store all the parameters needed for every
+    move in `history` array.
+"""
 class Move:
     def __init__(self, piece_kind, piece_id, coords,
                  action, promoting, piece_respawn=None):
@@ -45,7 +49,14 @@ class Move:
             self.respawn_id = piece_respawn[1]
             self.respawn_coords = piece_respawn[2]
 
-class coords_manager:
+
+
+"""
+    Stores all the coords of pieces and manages coords transformations.
+    It also acts as a converter between human-readable coords and pixel
+    coords on SCREEN
+"""
+class CoordsManager:
     def __init__(self):
         # Pieces arrays
         self.lista = [{},{}]
@@ -198,7 +209,6 @@ class coords_manager:
             
     def revert(self):
         self.reverted *= -1
-
         revert_x = {
             269: 837,
             340: 766,
@@ -225,14 +235,13 @@ class coords_manager:
             for k, e in i.items():
                 i[k] = [revert_x[e[0]],revert_y[e[1]]]
 
-        #self.lista[KN] = {1:[revert_x[self.rey_n[0]],revert_y[self.rey_n[1]]]}
-        #self.lista[KB] = {1:[revert_x[self.rey_b[0]],revert_y[self.rey_b[1]]]}
-        
         self.update()
 
 
-
-class sprites_manager:
+"""
+    Stores sprites and operates with them
+"""
+class SpritesManager:
     def __init__(self):
         self.probes = []
         self.imgs = []
@@ -279,8 +288,6 @@ class sprites_manager:
 
         self.revert(1)
 
-
-
     def revert(self, state):
         if state == 1:
             for i in xrange(0, 26):     
@@ -306,8 +313,11 @@ class sprites_manager:
             self.imgs[KN] = pygame.transform.rotozoom(self.imgs[KN], 180, 1)
 
 
-
-class matrix_manager:
+"""
+    Manages a boolean matrix to check filled squares and make a
+    'blocking ckeck' against long moves
+"""
+class MatrixManager:
     def __init__(self):
         self.ADAPTX = {'9':0,'8':1,'7':2,'6':3,'5':4,'4':5,'3':6,'2':7,'1':8}
         self.ADAPTY = {'a':0,'b':1,'c':2,'d':3,'e':4,'f':5,'g':6,'h':7,'i':8}
@@ -354,68 +364,65 @@ class matrix_manager:
     def get_hcoords(self, coords):
         return str(self.coords_hx[coords[0]])+str(self.coords_hy[coords[1]])
 
-
-    def check_ln(self, h_begin, h_destiny):
-        cursorx = self.ADAPTX[h_begin[0]]
-        cursory = self.ADAPTY[h_begin[1]]
-        while cursory != self.ADAPTY[h_destiny[1]]+1:
-            cursory -= 1
-            if self.matrix[cursory][cursorx] == True:
-                return False
-        return True
-
-
-    def check_lb(self, h_begin, h_destiny):
-        cursorx = self.ADAPTX[h_begin[0]]
-        cursory = self.ADAPTY[h_begin[1]]
-        while cursory != self.ADAPTY[h_destiny[1]]-1:
-            cursory += 1
-            if self.matrix[cursory][cursorx] == True:
-                return False
-        return True
-
-
-    def check_t(self, h_begin, h_destiny):
-        cursorx = self.ADAPTX[h_begin[0]]
-        cursory = self.ADAPTY[h_begin[1]]
-        destx = self.ADAPTX[h_destiny[0]]
-        desty = self.ADAPTY[h_destiny[1]]
-
-        if cursorx == destx:
-            mod = 1 if cursory < desty else -1
-            while cursory != desty - mod:
-                cursory += mod
+    def check(self, piece_kind, h_begin, h_destiny):
+        if piece_kind == LN:
+            cursorx = self.ADAPTX[h_begin[0]]
+            cursory = self.ADAPTY[h_begin[1]]
+            while cursory != self.ADAPTY[h_destiny[1]]+1:
+                cursory -= 1
                 if self.matrix[cursory][cursorx] == True:
                     return False
             return True
-        else:
-            mod = 1 if cursorx < destx else -1
-            while cursorx != destx - mod:
-                cursorx += mod
+        elif piece_kind == LB:
+            cursorx = self.ADAPTX[h_begin[0]]
+            cursory = self.ADAPTY[h_begin[1]]
+            while cursory != self.ADAPTY[h_destiny[1]]-1:
+                cursory += 1
+                if self.matrix[cursory][cursorx] == True:
+                    return False
+            return True
+        elif piece_kind in [TN, STN, TB, STB]:
+            cursorx = self.ADAPTX[h_begin[0]]
+            cursory = self.ADAPTY[h_begin[1]]
+            destx = self.ADAPTX[h_destiny[0]]
+            desty = self.ADAPTY[h_destiny[1]]
+
+            if cursorx == destx:
+                mod = 1 if cursory < desty else -1
+                while cursory != desty - mod:
+                    cursory += mod
+                    if self.matrix[cursory][cursorx] == True:
+                        return False
+                return True
+            else:
+                mod = 1 if cursorx < destx else -1
+                while cursorx != destx - mod:
+                    cursorx += mod
+                    if self.matrix[cursory][cursorx] == True:
+                        return False
+                return True
+        elif piece_kind in [BN, SBN, BB, SBB]:
+            cursorx = self.ADAPTX[h_begin[0]]
+            cursory = self.ADAPTY[h_begin[1]]
+            destx = self.ADAPTX[h_destiny[0]]
+            desty = self.ADAPTY[h_destiny[1]]
+
+            modx = 1 if cursorx < destx else -1
+            mody = 1 if cursory < desty else -1
+
+            while (cursorx != destx - modx) or (cursory != desty - mody):
+                cursorx += modx
+                cursory += mody
                 if self.matrix[cursory][cursorx] == True:
                     return False
             return True
 
 
-    def check_b(self, h_begin, h_destiny):
-        cursorx = self.ADAPTX[h_begin[0]]
-        cursory = self.ADAPTY[h_begin[1]]
-        destx = self.ADAPTX[h_destiny[0]]
-        desty = self.ADAPTY[h_destiny[1]]
-
-        modx = 1 if cursorx < destx else -1
-        mody = 1 if cursory < desty else -1
-
-        while (cursorx != destx - modx) or (cursory != desty - mody):
-            cursorx += modx
-            cursory += mody
-            if self.matrix[cursory][cursorx] == True:
-                return False
-        return True
-
-
-
-class input_manager:
+'''
+    Gets the text from the input file, renders it and stores all the
+    input data in a proper format for processing
+'''
+class InputManager:
     def __init__(self, input_text):
         self.raw = input_text.replace('\n','')
         self.movs = None
@@ -427,26 +434,22 @@ class input_manager:
         self.get_names()
         self.prepare_movs()
 
-
     def get_metadata(self):
         reg = re.compile(r'\[[^\[\]]*\]')
         self.metadata = reg.findall(self.raw)
         for e in self.metadata:
             self.raw = self.raw.replace(e, '')
 
-
     def get_names(self):
         sente = re.compile(
             r'\[([Ss]ente|[Bb]lack)[:\s][^\[\]]*"([a-zA-z0-9][^\[\]]*)"\s*\]')
         gote = re.compile(
             r'\[([Gg]ote|[Ww]hite)[:\s][^\[\]]*"([a-zA-z0-9][^\[\]]*)"\s*\]')
-
         for e in self.metadata:
             if sente.match(e):
                 self.sente = sente.match(e).group(2)
             elif gote.match(e):
                 self.gote = gote.match(e).group(2)
-
     
     def prepare_movs(self):
         reg = re.compile(
