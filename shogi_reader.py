@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding: utf-8
+# * coding: utf-8 *
 
 """
     Copyright (C) 2014-2016  Sebastián Bover Mota <sebassbm.info@gmail.com>
@@ -30,7 +30,7 @@
     Open the files in "games_recorded" directory to see how it works.
 """
 
-import pygame
+import pygame, tkMessageBox
 import sys
 import re
 
@@ -38,9 +38,28 @@ pygame.init()
 from pygame.locals import *
 
 from managers import MatrixManager, SpritesManager, Move
-from globales import *
-from globalvars import history, lamesa, partida, rawgame, game_data
-from funciones import redraw
+from globales import (PN, PB, SPN, SPB, LN, LB, SLN, SLB, NN, NB, SNN,
+                      SNB, SN, SB, SSN, SSB, TN, TB, STN, STB, BN, BB,
+                      SBN, SBB, GN, GB, KN, KB, SCREEN)
+from globalvars import history, lamesa, partida, rawgame, game_data, matrix
+from funciones import redraw, check_legal_destiny
+
+PROMOTABLE = [PN,PB,LN,LB,NN,NB,SN,SB,TN,TB,BN,BB]
+PROMOTED_KINDS = [SPN,SPB,SLN,SLB,SNN,SNB,SSN,SSB,STN,STB,SBN,SBB]
+CONVERT_KIND = { 'Pn': PN, 'Pb': PB,
+                 'Ln': LN, 'Lb': LB,
+                 'Nn': NN, 'Nb': NB,
+                 'Sn': SN, 'Sb': SB,
+                 'Gn': GN, 'Gb': GB,
+                 'Rn': TN, 'Rb': TB,
+                 'Bn': BN, 'Bb': BB,
+                 'Kn': KN, 'Kb': KB,
+                 '+Pn': SPN, '+Pb': SPB,
+                 '+Ln': SLN, '+Lb': SLB,
+                 '+Nn': SNN, '+Nb': SNB,
+                 '+Sn': SSN, '+Sb': SSB,
+                 '+Rn': STN, '+Rb': STB,
+                 '+Bn': SBN, '+Bb': SBB }
 
 #reloj = pygame.time.Clock()
 
@@ -62,7 +81,7 @@ from funciones import redraw
 pygame.display.set_caption("ShogiReader - Reproductor de partidas grabadas")
 
 # *** POSITIONS TABLE and Pieces arrays ***
-matrix = MatrixManager()
+#matrix = MatrixManager()
 
 # *** Load input file ***
 movs = game_data.movs.splitlines()
@@ -104,735 +123,75 @@ for move in movs:
     elif action_g == '-':
         action = 0
     sente = int(num_g) % 2 == 1
+    possible_moves = 0
+    if sente:
+        player = 'n'
+    else:
+        player = 'b'
+    dry = CONVERT_KIND[kind+player]
 
-    # Create respawn data for captured piece
+    # Handle piece capture
     if action == 1:
-        PROMOTED_KINDS = [SPN,SPB,SLN,SLB,SNN,SNB,SSN,SSB,STN,STB,SBN,SBB]
         found = False
         while not found:
-            for sho in xrange(0,27):
+            for sho in xrange(0,28):
                 for k, e in lamesa.lista[sho].items():
                     if e == destiny:
                         del lamesa.lista[sho][k]
                         fres = (sho if not sho in
                                  PROMOTED_KINDS else sho - 2)
                         fres += -1 if sente else 1
-                        lamesa.r[fres] += 1
+                        if fres not in [KN, KB]:
+                            lamesa.r[fres] += 1
                         piece_respawn[0] = sho
                         piece_respawn[1] = k
                         piece_respawn[2] = [destiny_h[0], destiny_h[1]]
                         found = True
                         break
 
-    possible_moves = 0
     # Case: starting coords of piece not provided
     if piece_x == 0 and action != 2:
-        if sente: #Negras
-            if kind == 'P':
-                for k, pn in lamesa.lista[PN].items():
-                    if destiny[0] == pn[0] and destiny[1] == pn[1]-71:
-                        possible_moves += 1
-                        move_to_add = Move(PN, k, [0,-71], action,
-                                         promoting, piece_respawn)
-                        matrix.empty(
-                                matrix.get_hcoords(lamesa.lista[PN][k])
-                        )
-                        lamesa.lista[PN][k] = destiny
-                        matrix.fill(destiny_h)
-                        if promoting:
-                            del lamesa.lista[PN][k]
-                            lamesa.lista[SPN][k] = destiny
-            if kind == 'L':
-                for k, ln in lamesa.lista[LN].items():
-                    if destiny[0] == ln[0] and destiny[1] < ln[1]:
-                        if matrix.check(LN, matrix.get_hcoords(ln), destiny_h):
-                            possible_moves += 1
-                            move_to_add = Move(LN, k, [0,destiny[1]-ln[1]],
-                                          action, promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[LN][k])
-                            )
-                            lamesa.lista[LN][k] = destiny
-                            matrix.fill(destiny_h)
-                            if promoting:
-                                del lamesa.lista[LN][k]
-                                lamesa.lista[SLN][k] = destiny
-            if kind == 'N':
-                for k, nn in lamesa.lista[NN].items():
-                    if (destiny[0] == nn[0]+71 or
-                            destiny[0] == nn[0]-71) and (destiny[1] ==
-                            nn[1]-142):
-                        possible_moves += 1
-                        move_to_add = Move(NN, k, [destiny[0]-nn[0],
-                                           destiny[1]-nn[1]], action,
-                                           promoting, piece_respawn)
-                        matrix.empty(
-                                matrix.get_hcoords(lamesa.lista[NN][k])
-                        )
-                        lamesa.lista[NN][k] = destiny
-                        matrix.fill(destiny_h)
-                        if promoting:
-                            del lamesa.lista[NN][k]
-                            lamesa.lista[SNN][k] = destiny
-            if kind == 'S':
-                for k, sn in lamesa.lista[SN].items():
-                    if (destiny[0] <= sn[0]+71 and destiny[0] >= sn[0]-71 and
-                            destiny[1] == sn[1]-71) or (
-                             (destiny[0] == sn[0]+71 or
-                             destiny[0] == sn[0]-71) and
-                            destiny[1] == sn[1]+71):
-                        possible_moves += 1
-                        move_to_add = Move(SN, k, [destiny[0]-sn[0],
-                                           destiny[1]-sn[1]], action,
-                                           promoting, piece_respawn)
-                        matrix.empty(
-                                matrix.get_hcoords(lamesa.lista[SN][k])
-                        )
-                        lamesa.lista[SN][k] = destiny
-                        matrix.fill(destiny_h)
-                        if promoting:
-                            del lamesa.lista[SN][k]
-                            lamesa.lista[SSN][k] = destiny
-            if kind == 'G':
-                for k, gn in lamesa.lista[GN].items():
-                    if (destiny[0] <= gn[0]+71 and destiny[0] >= gn[0]-71 and
-                            destiny[1] == gn[1]-71) or ((destiny[0] ==
-                            gn[0]+71 or destiny[0] == gn[0]-71)
-                            and destiny[1] == gn[1]) or (destiny[0] ==
-                            gn[0] and destiny[1] == gn[1]+71):
-                        possible_moves += 1
-                        move_to_add = Move(GN, k, [destiny[0]-gn[0],
-                                           destiny[1]-gn[1]], action,
-                                           promoting, piece_respawn)
-                        matrix.empty(
-                                matrix.get_hcoords(lamesa.lista[GN][k])
-                        )
-                        lamesa.lista[GN][k] = destiny
-                        matrix.fill(destiny_h)
-            if kind == '+P' or kind == '+L' or kind == '+N' or kind == '+S':
-                mem = kind[1].upper()
-                statem = 'for k, j in lamesa.lista[S'+mem+'N].items():\n'
-                statem+= '    if (destiny[0] <= j[0]+71 and destiny[0] >='
-                statem+= '            j[0]-71 and destiny[1] == j[1]-71) or ('
-                statem+= '            (destiny[0] == j[0]+71 or destiny[0] =='
-                statem+= '             j[0]-71) and destiny[1] == j[1]) or ('
-                statem+= '             destiny[0] == j[0] and destiny[1] =='
-                statem+= '             j[1]+71):\n'
-                statem+= '        possible_moves += 1\n'
-                statem+= '        move_to_add = Move(S'+mem+'N, k,'
-                statem+= '[destiny[0]-j[0],destiny[1]-j[1]],'+str(action)+','
-                statem+=  str(promoting)+',piece_respawn)\n'
-                statem+= '        matrix.empty(matrix.get_hcoords('
-                statem+= 'lamesa.lista[S'+mem+'N][k]))\n'
-                statem+= '        lamesa.lista[S'+mem+'N][k] = destiny\n'
-                statem+= '        matrix.fill(destiny_h)'
-                exec statem
-            if kind == 'R':
-                for k, tn in lamesa.lista[TN].items():
-                    if (destiny[0] == tn[0]) != (destiny[1] == tn[1]):
-                        if matrix.check(TN, matrix.get_hcoords(tn), destiny_h):
-                            possible_moves += 1
-                            move_to_add = Move(TN, k, [destiny[0]-tn[0],
-                                               destiny[1]-tn[1]], action,
-                                               promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[TN][k])
-                            )
-                            lamesa.lista[TN][k] = destiny
-                            matrix.fill(destiny_h)
-                            if promoting:
-                                del lamesa.lista[TN][k]
-                                lamesa.lista[STN][k] = destiny
-            if kind == '+R':
-                for k, stn in lamesa.lista[STN].items():
-                    if ((destiny[0] == stn[0]) != (destiny[1] == stn[1])) or (
-                            destiny[0] <= stn[0]+71 and destiny[0] >=
-                            stn[0]-71 and destiny[1] <= stn[1]+71 and
-                            destiny[1] >= stn[1]-71):
-                        if ((destiny[0] == stn[0]) != (destiny[1] ==
-                                  stn[1]) and matrix.check(STN,
-                                        matrix.get_hcoords(stn),
-                                        destiny_h)) or not((destiny[0] ==
-                                   stn[0]) != (destiny[1] == stn[1])):
-                            possible_moves += 1
-                            move_to_add = Move(STN, k, [destiny[0]-stn[0],
-                                               destiny[1]-stn[1]], action,
-                                               promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[STN][k])
-                            )
-                            lamesa.lista[STN][k] = destiny
-                            matrix.fill(destiny_h)
-            if kind == 'B':
-                for k, bn in lamesa.lista[BN].items():
-                    if abs(destiny[0]-bn[0]) == abs(destiny[1]-bn[1]):
-                        if matrix.check(BN, matrix.get_hcoords(bn), destiny_h):
-                            possible_moves += 1
-                            move_to_add = Move(BN, k, [destiny[0]-bn[0],
-                                               destiny[1]-bn[1]], action,
-                                               promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[BN][k])
-                            )
-                            lamesa.lista[BN][k] = destiny
-                            matrix.fill(destiny_h)
-                            if promoting:
-                                del lamesa.lista[BN][k]
-                                lamesa.lista[SBN][k] = destiny
-            if kind == '+B':
-                for k, sbn in lamesa.lista[SBN].items():
-                    if (abs(destiny[0]-sbn[0]) == abs(destiny[1]-sbn[1])) or (
-                           destiny[0] <= sbn[0]+71 and destiny[0] >=
-                           sbn[0]-71 and destiny[1] <= sbn[1]+71 and
-                           destiny[1] >= sbn[1]-71):
-                        if ((abs(destiny[0]-sbn[0]) == abs(destiny[1]-sbn[1])
-                            ) and matrix.check(SBN, matrix.get_hcoords(sbn),
-                              destiny_h)) or not (abs(destiny[0]-sbn[0]) ==
-                                abs(destiny[1]-sbn[1])):
-                            possible_moves += 1
-                            move_to_add = Move(SBN, k, [destiny[0]-sbn[0],
-                                               destiny[1]-sbn[1]], action,
-                                               promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[SBN][k])
-                            )
-                            lamesa.lista[SBN][k] = destiny
-                            matrix.fill(destiny_h)
-            if kind == 'K':
-                if (destiny[0] <= lamesa.lista[KN][1][0]+71 and
-                        destiny[0] >= lamesa.lista[KN][1][0]-71 and
-                        destiny[1] <= lamesa.lista[KN][1][1]+71 and
-                        destiny[1] >= lamesa.lista[KN][1][1]-71):
-                    move_to_add = Move(KN, 1,
-                                       [destiny[0]-lamesa.lista[KN][1][0],
-                                       destiny[1]-lamesa.lista[KN][1][1]],
-                                       action, promoting, piece_respawn)
-                    matrix.empty(matrix.get_hcoords(lamesa.lista[KN][1]))
-                    lamesa.lista[KN][1] = destiny
-                    matrix.fill(destiny_h)
-        else: #Blancas
-            if kind == 'P':
-                for k, pb in lamesa.lista[PB].items():
-                    if destiny[0] == pb[0] and destiny[1] == pb[1]+71:
-                        possible_moves += 1
-                        move_to_add = Move(PB, k, [0, 71], action,
-                                           promoting, piece_respawn)
-                        matrix.empty(
-                                matrix.get_hcoords(lamesa.lista[PB][k])
-                        )
-                        lamesa.lista[PB][k] = destiny
-                        matrix.fill(destiny_h)
-                        if promoting:
-                            del lamesa.lista[PB][k]
-                            lamesa.lista[SPB][k] = destiny
-            if kind == 'L':
-                for k, lb in lamesa.lista[LB].items():
-                    if destiny[0] == lb[0] and destiny[1] > lb[1]:
-                        if matrix.check(LB, matrix.get_hcoords(lb), destiny_h):
-                            possible_moves += 1
-                            move_to_add = Move(LB, k, [0, destiny[1]-lb[1]],
-                                               action, promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[LB][k])
-                            )
-                            lamesa.lista[LB][k] = destiny
-                            matrix.fill(destiny_h)
-                            if promoting:
-                                del lamesa.lista[LB][k]
-                                lamesa.lista[SLB][k] = destiny
-            if kind == 'N':
-                for k, nb in lamesa.lista[NB].items():
-                    if (destiny[0] == nb[0]+71 or destiny[0] == nb[0]-71) and (
-                               destiny[1] == nb[1]+142):
-                        possible_moves += 1
-                        move_to_add = Move(NB, k, [destiny[0]-nb[0],
-                                           destiny[1]-nb[1]], action,
-                                           promoting, piece_respawn)
-                        matrix.empty(
-                                matrix.get_hcoords(lamesa.lista[NB][k])
-                        )
-                        lamesa.lista[NB][k] = destiny
-                        matrix.fill(destiny_h)
-                        if promoting:
-                            del lamesa.lista[NB][k]
-                            lamesa.lista[SNB][k] = destiny
-            if kind == 'S':
-                for k, sb in lamesa.lista[SB].items():
-                    if (destiny[0] <= sb[0]+71 and destiny[0] >= sb[0]-71 and
-                            destiny[1] == sb[1]+71) or (
-                              (destiny[0] == sb[0]+71 or
-                               destiny[0] == sb[0]-71) and
-                              destiny[1] == sb[1]-71):
-                        possible_moves += 1
-                        move_to_add = Move(SB, k, [destiny[0]-sb[0],
-                                           destiny[1]-sb[1]], action,
-                                           promoting, piece_respawn)
-                        matrix.empty(
-                                matrix.get_hcoords(lamesa.lista[SB][k])
-                        )
-                        lamesa.lista[SB][k] = destiny
-                        matrix.fill(destiny_h)
-                        if promoting:
-                            del lamesa.lista[SB][k]
-                            lamesa.lista[SSB][k] = destiny
-            if kind == 'G':
-                for k, gb in lamesa.lista[GB].items():
-                    if (destiny[0] <= gb[0]+71 and destiny[0] >= gb[0]-71 and
-                             destiny[1] == gb[1]+71) or (
-                              (destiny[0] == gb[0]+71 or
-                                destiny[0] == gb[0]-71) and
-                              destiny[1] == gb[1]) or (destiny[0] == gb[0] and
-                              destiny[1] == gb[1]-71):
-                        possible_moves += 1
-                        move_to_add = Move(GB, k, [destiny[0]-gb[0],
-                                           destiny[1]-gb[1]], action,
-                                           promoting, piece_respawn)
-                        matrix.empty(
-                                matrix.get_hcoords(lamesa.lista[GB][k])
-                        )
-                        lamesa.lista[GB][k] = destiny
-                        matrix.fill(destiny_h)
-            if kind == '+P' or kind == '+L' or kind == '+N' or kind == '+S':
-                mem = kind[1].upper()
-                statem = 'for k, j in lamesa.lista[S'+mem+'B].items():\n'
-                statem+= '    if (destiny[0] <= j[0]+71 and destiny[0] >='
-                statem+= '            j[0]-71 and destiny[1] == j[1]+71) or ('
-                statem+= '            (destiny[0] == j[0]+71 or destiny[0] =='
-                statem+= '             j[0]-71) and destiny[1] == j[1]) or ('
-                statem+= '             destiny[0] == j[0] and destiny[1] =='
-                statem+= '             j[1]-71):\n'
-                statem+= '        possible_moves += 1\n'
-                statem+= '        move_to_add = Move(S'+mem+'B, k,'
-                statem+= '[destiny[0]-j[0],destiny[1]-j[1]],'+str(action)+','
-                statem+=  str(promoting)+',piece_respawn)\n'
-                statem+= '        matrix.empty(matrix.get_hcoords('
-                statem+= 'lamesa.lista[S'+mem+'B][k]))\n'
-                statem+= '        lamesa.lista[S'+mem+'B][k] = destiny\n'
-                statem+= '        matrix.fill(destiny_h)'
-                exec statem
-            if kind == 'R':
-                for k, tb in lamesa.lista[TB].items():
-                    if (destiny[0] == tb[0]) != (destiny[1] == tb[1]):
-                        if matrix.check(TB, matrix.get_hcoords(tb),destiny_h):
-                            possible_moves += 1
-                            move_to_add = Move(TB, k, [destiny[0]-tb[0],
-                                               destiny[1]-tb[1]], action,
-                                               promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[TB][k])
-                            )
-                            lamesa.lista[TB][k] = destiny
-                            matrix.fill(destiny_h)
-                            if promoting:
-                                del lamesa.lista[TB][k]
-                                lamesa.lista[STB][k] = destiny
-            if kind == '+R':
-                for k, stb in lamesa.lista[STB].items():
-                    if ((destiny[0] == stb[0]) != (destiny[1] == stb[1])) or (
-                            destiny[0] <= stb[0]+71 and destiny[0] >=
-                            stb[0]-71 and destiny[1] <= stb[1]+71 and
-                            destiny[1] >= stb[1]-71):
-                        if ((destiny[0] == stb[0]) != (destiny[1] ==
-                                  stb[1]) and matrix.check(STB,
-                                        matrix.get_hcoords(stb),
-                                        destiny_h)) or not((destiny[0] ==
-                                   stb[0]) != (destiny[1] == stb[1])):
-                            possible_moves += 1
-                            move_to_add = Move(STB, k, [destiny[0]-stb[0],
-                                               destiny[1]-stb[1]], action,
-                                               promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[STB][k])
-                            )
-                            lamesa.lista[STB][k] = destiny
-                            matrix.fill(destiny_h)
-            if kind == 'B':
-                for k, bb in lamesa.lista[BB].items():
-                    if abs(destiny[0]-bb[0]) == abs(destiny[1]-bb[1]):
-                        if matrix.check(BB, matrix.get_hcoords(bb), destiny_h):
-                            possible_moves += 1
-                            move_to_add = Move(BB, k, [destiny[0]-bb[0],
-                                               destiny[1]-bb[1]], action,
-                                               promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[BB][k])
-                            )
-                            lamesa.lista[BB][k] = destiny
-                            matrix.fill(destiny_h)
-                            if promoting:
-                                del lamesa.lista[BB][k]
-                                lamesa.lista[SBB][k] = destiny
-            if kind == '+B':
-                for k, sbb in lamesa.lista[SBB].items():
-                    if (abs(destiny[0]-sbb[0]) == abs(destiny[1]-sbb[1])) or (
-                           destiny[0] <= sbb[0]+71 and destiny[0] >=
-                           sbb[0]-71 and destiny[1] <= sbb[1]+71 and
-                           destiny[1] >= sbb[1]-71):
-                        if ((abs(destiny[0]-sbb[0]) == abs(destiny[1]-sbb[1])
-                            ) and matrix.check(SBB, matrix.get_hcoords(sbb),
-                              destiny_h)) or not (abs(destiny[0]-sbb[0]) ==
-                                abs(destiny[1]-sbb[1])):
-                            possible_moves += 1
-                            move_to_add = Move(SBB, k, [destiny[0]-sbb[0],
-                                               destiny[1]-sbb[1]], action,
-                                               promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[SBB][k])
-                            )
-                            lamesa.lista[SBB][k] = destiny
-                            matrix.fill(destiny_h)
-            if kind == 'K':
-                if (destiny[0] <= lamesa.lista[KB][1][0]+71 and
-                        destiny[0] >= lamesa.lista[KB][1][0]-71 and
-                        destiny[1] <= lamesa.lista[KB][1][1]+71 and
-                        destiny[1] >= lamesa.lista[KB][1][1]-71):
-                    move_to_add = Move(KB, 1,
-                                       [destiny[0]-lamesa.lista[KB][1][0],
-                                       destiny[1]-lamesa.lista[KB][1][1]],
-                                       action, promoting, piece_respawn)
-                    matrix.empty(matrix.get_hcoords(lamesa.lista[KB][1]))
-                    lamesa.lista[KB][1] = destiny
-                    matrix.fill(destiny_h)
+        for k, piece in lamesa.lista[dry].items():
+            if check_legal_destiny(dry, piece, destiny, destiny_h):
+                possible_moves += 1
+                move_to_add = Move(dry, k, [destiny[0]-piece[0],
+                                   destiny[1]-piece[1]], action,
+                                   promoting, piece_respawn)
+                matrix.empty(
+                        matrix.get_hcoords(lamesa.lista[dry][k])
+                )
+                lamesa.lista[dry][k] = destiny
+                matrix.fill(destiny_h)
+                if promoting and dry in PROMOTABLE:
+                    del lamesa.lista[dry][k]
+                    lamesa.lista[dry+2][k] = destiny
     # Case: initial piece coords provided AND it's not a drop
     elif action != 2:
-        if sente: #Negras
-            if kind == 'P':
-                for k, pn in lamesa.lista[PN].items():
-                    if pn[0] == piece_x and pn[1] == piece_y:
-                        move_to_add = Move(PN, k, [0,-71], action,
-                                           promoting, piece_respawn)
-                        matrix.empty(
-                                matrix.get_hcoords(lamesa.lista[PN][k])
-                        )
-                        lamesa.lista[PN][k] = destiny
-                        matrix.fill(destiny_h)
-                        if promoting:
-                            del lamesa.lista[PN][k]
-                            lamesa.lista[SPN][k] = destiny
-                        break
-            if kind == 'L':
-                for k, ln in lamesa.lista[LN].items():
-                    if ln[0] == piece_x and ln[1] == piece_y:
-                        if matrix.check(LN, matrix.get_hcoords(ln), destiny_h):
-                            move_to_add = Move(LN, k, [0,destiny[1]-ln[1]],
-                                               action, promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[LN][k])
-                            )
-                            lamesa.lista[LN][k] = destiny
-                            matrix.fill(destiny_h)
-                            if promoting:
-                                del lamesa.lista[LN][k]
-                                lamesa.lista[SLN][k] = destiny
-                            break
-            if kind == 'N':
-                for k, nn in lamesa.lista[NN].items():
-                    if nn[0] == piece_x and nn[1] == piece_y:
-                        move_to_add = Move(NN, k, [destiny[0]-nn[0],
-                                           destiny[1]-nn[1]], action,
-                                           promoting, piece_respawn)
-                        matrix.empty(
-                                matrix.get_hcoords(lamesa.lista[NN][k])
-                        )
-                        lamesa.lista[NN][k] = destiny
-                        matrix.fill(destiny_h)
-                        if promoting:
-                            del lamesa.lista[NN][k]
-                            lamesa.lista[SNN][k] = destiny
-                        break
-            if kind == 'S':
-                for k, sn in lamesa.lista[SN].items():
-                    if sn[0] == piece_x and sn[1] == piece_y:
-                        move_to_add = Move(SN, k, [destiny[0]-sn[0],
-                                           destiny[1]-sn[1]], action,
-                                           promoting, piece_respawn)
-                        matrix.empty(
-                                matrix.get_hcoords(lamesa.lista[SN][k])
-                        )
-                        lamesa.lista[SN][k] = destiny
-                        matrix.fill(destiny_h)
-                        if promoting:
-                            del lamesa.lista[SN][k]
-                            lamesa.lista[SSN][k] = destiny
-                        break
-            if kind == 'G':
-                for k, gn in lamesa.lista[GN].items():
-                    if gn[0] == piece_x and gn[1] == piece_y:
-                        move_to_add = Move(GN, k, [destiny[0]-gn[0],
-                                           destiny[1]-gn[1]], action,
-                                           promoting, piece_respawn)
-                        matrix.empty(
-                                matrix.get_hcoords(lamesa.lista[GN][k])
-                        )
-                        lamesa.lista[GN][k] = destiny
-                        matrix.fill(destiny_h)
-                        break
-            if kind == '+P' or kind == '+L' or kind == '+N' or kind == '+S':
-                mem = kind[1].lower()
-                statem = 'for k, j in lamesa.lista[S'+mem+'N].items():\n'
-                statem+= '    if j[0] == piece_x and j[1] == piece_y:\n'
-                statem+= '        move_to_add = Move(S'+mem+'N, k,'
-                statem+= '[destiny[0]-j[0],destiny[1]-j[1]],'+str(action)+','
-                statem+=  str(promoting)+',piece_respawn)\n'
-                statem+= '        matrix.empty(matrix.get_hcoords('
-                statem+= 'lamesa.lista[S'+mem+'N][k]))\n'
-                statem+= '        lamesa.lista[S'+mem+'N][k] = destiny\n'
-                statem+= '        matrix.fill(destiny_h)\n'
-                statem+= '        break'
-                exec statem
-            if kind == 'R':
-                for k, tn in lamesa.lista[TN].items():
-                    if tn[0] == piece_x and tn[1] == piece_y:
-                        if matrix.check(TN, matrix.get_hcoords(tn), destiny_h):
-                            move_to_add = Move(TN, k, [destiny[0]-tn[0],
-                                               destiny[1]-tn[1]], action,
-                                               promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[TN][k])
-                            )
-                            lamesa.lista[TN][k] = destiny
-                            matrix.fill(destiny_h)
-                            if promoting:
-                                del lamesa.lista[TN][k]
-                                lamesa.lista[STN][k] = destiny
-                            break
-            if kind == '+R':
-                for k, stn in lamesa.lista[STN].items():
-                    if stn[0] == piece_x and stn[1] == piece_y:
-                        if ((destiny[0] == stn[0]) != (destiny[1] == stn[1]
-                            ) and matrix.check(STN, matrix.get_hcoords(stn),
-                              destiny_h)) or not ((destiny[0] == stn[0]) != (
-                                destiny[1] == stn[1])):
-                            move_to_add = Move(STN, k, [destiny[0]-stn[0],
-                                               destiny[1]-stn[1]], action,
-                                               promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[STN][k])
-                            )
-                            lamesa.lista[STN][k] = destiny
-                            matrix.fill(destiny_h)
-                            break
-            if kind == 'B':
-                for k, bn in lamesa.lista[BN].items():
-                    if bn[0] == piece_x and bn[1] == piece_y:
-                        if matrix.check(BN, matrix.get_hcoords(bn),destiny_h):
-                            move_to_add = Move(BN, k, [destiny[0]-bn[0],
-                                               destiny[1]-bn[1]], action,
-                                               promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[BN][k])
-                            )
-                            lamesa.lista[BN][k] = destiny
-                            matrix.fill(destiny_h)
-                            if promoting:
-                                del lamesa.lista[BN][k]
-                                lamesa.lista[SBN][k] = destiny
-                            break
-            if kind == '+B':
-                for k, sbn in lamesa.lista[SBN].items():
-                    if sbn[0] == piece_x and sbn[1] == piece_y:
-                        if ((abs(destiny[0]-sbn[0]) == abs(destiny[1]-sbn[1])
-                            ) and matrix.check(SBN, matrix.get_hcoords(sbn),
-                                destiny_h)) or not (abs(destiny[0]-sbn[0]
-                                ) == abs(destiny[1]-sbn[1])):
-                            move_to_add = Move(SBN, k, [destiny[0]-sbn[0],
-                                               destiny[1]-sbn[1]], action,
-                                               promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[SBN][k])
-                            )
-                            lamesa.lista[SBN][k] = destiny
-                            matrix.fill(destiny_h)
-                            break
-            if kind == 'K':
-                if (lamesa.lista[KN][1][0] == piece_x and
-                          lamesa.lista[KN][1][1] == piece_y):
-                    move_to_add = Move(KN, 1,
-                                       [destiny[0]-lamesa.lista[KN][1][0],
-                                       destiny[1]-lamesa.lista[KN][1][1]],
-                                       action, promoting, piece_respawn)
-                    matrix.empty(matrix.get_hcoords(lamesa.lista[KN][1]))
-                    lamesa.lista[KN][1] = destiny
+        for k, piece in lamesa.lista[dry].items():
+            if piece[0] == piece_x and piece[1] == piece_y:
+                if matrix.check(dry, matrix.get_hcoords(piece),
+                                                    destiny_h):
+                    move_to_add = Move(dry, k, [destiny[0]-piece[0],
+                                       destiny[1]-piece[1]], action,
+                                       promoting, piece_respawn)
+                    matrix.empty(
+                            matrix.get_hcoords(lamesa.lista[dry][k])
+                    )
+                    lamesa.lista[dry][k] = destiny
                     matrix.fill(destiny_h)
-        else: # Blancas
-            if kind == 'P':
-                for k, pb in lamesa.lista[PB].items():
-                    if pb[0] == piece_x and pb[1] == piece_y:
-                        move_to_add = Move(PB, k, [0,71], action,
-                                           promoting, piece_respawn)
-                        matrix.empty(
-                                matrix.get_hcoords(lamesa.lista[PB][k])
-                        )
-                        lamesa.lista[PB][k] = destiny
-                        matrix.fill(destiny_h)
-                        if promoting:
-                            del lamesa.lista[PB][k]
-                            lamesa.lista[SPB][k] = destiny
-                        break
-            if kind == 'L':
-                for k, lb in lamesa.lista[LB].items():
-                    if lb[0] == piece_x and lb[1] == piece_y:
-                        if matrix.check(LB, matrix.get_hcoords(lb), destiny_h):
-                            move_to_add = Move(LB, k, [0,destiny[1]-lb[1]],
-                                               action, promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[LB][k])
-                            )
-                            lamesa.lista[LB][k] = destiny
-                            matrix.fill(destiny_h)
-                            if promoting:
-                                del lamesa.lista[LB][k]
-                                lamesa.lista[SLB][k] = destiny
-                            break
-            if kind == 'N':
-                for k, nb in lamesa.lista[NB].items():
-                    if nb[0] == piece_x and nb[1] == piece_y:
-                        move_to_add = Move(NB, k, [destiny[0]-nb[0],
-                                           destiny[1]-nb[1]], action,
-                                           promoting, piece_respawn)
-                        matrix.empty(
-                                matrix.get_hcoords(lamesa.lista[NB][k])
-                        )
-                        lamesa.lista[NB][k] = destiny
-                        matrix.fill(destiny_h)
-                        if promoting:
-                            del lamesa.lista[NB][k]
-                            lamesa.lista[SNB][k] = destiny
-                        break
-            if kind == 'S':
-                for k, sb in lamesa.lista[SB].items():
-                    if sb[0] == piece_x and sb[1] == piece_y:
-                        move_to_add = Move(SB, k, [destiny[0]-sb[0],
-                                           destiny[1]-sb[1]], action,
-                                           promoting, piece_respawn)
-                        matrix.empty(
-                                matrix.get_hcoords(lamesa.lista[SB][k])
-                        )
-                        lamesa.lista[SB][k] = destiny
-                        matrix.fill(destiny_h)
-                        if promoting:
-                            del lamesa.lista[SB][k]
-                            lamesa.lista[SSB][k] = destiny
-                        break
-            if kind == 'G':
-                for k, gb in lamesa.lista[GB].items():
-                    if gb[0] == piece_x and gb[1] == piece_y:
-                        move_to_add = Move(GB, k, [destiny[0]-gb[0],
-                                           destiny[1]-gb[1]], action,
-                                           promoting, piece_respawn)
-                        matrix.empty(
-                                matrix.get_hcoords(lamesa.lista[GB][k])
-                        )
-                        lamesa.lista[GB][k] = destiny
-                        matrix.fill(destiny_h)
-                        break
-            if kind == '+P' or kind == '+L' or kind == '+N' or kind == '+S':
-                mem = kind[1].lower()
-                statem = 'for k, j in lamesa.lista[S'+mem+'B].items():\n'
-                statem+= '    if j[0] == piece_x and j[1] == piece_y:\n'
-                statem+= '        move_to_add = Move(S'+mem+'B, k,'
-                statem+= '[destiny[0]-j[0],destiny[1]-j[1]],'+str(action)+','
-                statem+=  str(promoting)+',piece_respawn)\n'
-                statem+= '        matrix.empty(matrix.get_hcoords('
-                statem+= 'lamesa.lista[S'+mem+'B][k]))\n'
-                statem+= '        lamesa.lista[S'+mem+'B][k] = destiny\n'
-                statem+= '        matrix.fill(destiny_h)\n\t\t'
-                statem+= '        break'
-                exec statem
-            if kind == 'R':
-                for k, tb in lamesa.lista[TB].items():
-                    if tb[0] == piece_x and tb[1] == piece_y:
-                        if matrix.check(TB, matrix.get_hcoords(tb),destiny_h):
-                            move_to_add = Move(TB, k, [destiny[0]-tb[0],
-                                               destiny[1]-tb[1]], action,
-                                               promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[TB][k])
-                            )
-                            lamesa.lista[TB][k] = destiny
-                            matrix.fill(destiny_h)
-                            if promoting:
-                                del lamesa.lista[TB][k]
-                                lamesa.lista[STB][k] = destiny
-                            break
-            if kind == '+R':
-                for k, stb in lamesa.lista[STB].items():
-                    if stb[0] == piece_x and stb[1] == piece_y:
-                        if ((destiny[0] == stb[0]) != (destiny[1] == stb[1]
-                            ) and matrix.check(STB, matrix.get_hcoords(stb),
-                              destiny_h)) or not ((destiny[0] == stb[0]) != (
-                                destiny[1] == stb[1])):
-                            move_to_add = Move(STB, k, [destiny[0]-stb[0],
-                                               destiny[1]-stb[1]], action,
-                                               promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[STB][k])
-                            )
-                            lamesa.lista[STB][k] = destiny
-                            matrix.fill(destiny_h)
-                            break
-            if kind == 'B':
-                for k, bb in lamesa.lista[BB].items():
-                    if bb[0] == piece_x and bb[1] == piece_y:
-                        if matrix.check(BB, matrix.get_hcoords(bb),destiny_h):
-                            move_to_add = Move(BB, k, [destiny[0]-bb[0],
-                                               destiny[1]-bb[1]], action,
-                                               promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[BB][k])
-                            )
-                            lamesa.lista[BB][k] = destiny
-                            matrix.fill(destiny_h)
-                            if promoting:
-                                del lamesa.lista[BB][k]
-                                lamesa.lista[SBB][k] = destiny
-                            break
-            if kind == '+B':
-                for k, sbb in lamesa.lista[SBB].items():
-                    if sbb[0] == piece_x and sbb[1] == piece_y:
-                        if ((abs(destiny[0]-sbb[0]) == abs(destiny[1]-sbb[1])
-                            ) and matrix.check(SBB, matrix.get_hcoords(sbb),
-                                destiny_h) == True) or not(abs(destiny[0]-sbb[0]
-                                ) == abs(destiny[1]-sbb[1])):
-                            move_to_add = Move(SBB, k, [destiny[0]-sbb[0],
-                                               destiny[1]-sbb[1]], action,
-                                               promoting, piece_respawn)
-                            matrix.empty(
-                                    matrix.get_hcoords(lamesa.lista[SBB][k])
-                            )
-                            lamesa.lista[SBB][k] = destiny
-                            matrix.fill(destiny_h)
-                            break
-            if kind == 'K':
-                if (lamesa.lista[KB][1][0] == piece_x and
-                          lamesa.lista[KB][1][1] == piece_y):
-                    move_to_add = Move(KB, 1,
-                                       [destiny[0]-lamesa.lista[KB][1][0],
-                                       destiny[1]-lamesa.lista[KB][1][1]],
-                                       action, promoting, piece_respawn)
-                    matrix.empty(matrix.get_hcoords(lamesa.lista[KB][1]))
-                    lamesa.lista[KB][1] = destiny
-                    matrix.fill(destiny_h)
-    else: # Action=2 (piece drop)
-        NORMAL_KINDS = [PN,PB,LN,LB,NN,NB,SN,SB,GN,GB,TN,TB,BN,BB]
-        CONVERT_KIND = { 'Pn': PN, 'Pb': PB,
-                         'Ln': LN, 'Lb': LB,
-                         'Nn': NN, 'Nb': NB,
-                         'Sn': SN, 'Sb': SB,
-                         'Gn': GN, 'Gb': GB,
-                         'Rn': TN, 'Rb': TB,
-                         'Bn': BN, 'Bb': BB }
-        if sente: #Negras
-            player = 'n'
-        else:
-            player = 'b'
-        dry = CONVERT_KIND[kind+player]
+                    if promoting and dry in PROMOTABLE:
+                        del lamesa.lista[dry][k]
+                        lamesa.lista[dry+2][k] = destiny
+                    break
+    # Case: Action=2 (piece drop)
+    elif kind[0] != '+':
         move_to_add = Move(dry, lamesa.cnt[dry], destiny_h,
                            action, promoting, piece_respawn)
         lamesa.lista[dry][lamesa.cnt[dry]] = destiny
         lamesa.cnt[dry] += 1
         lamesa.r[dry] -= 1
 
+    #
     # TODO Check legal move -> not perfect yet
     if move_to_add != None:
         history.append(move_to_add)
@@ -844,7 +203,7 @@ for move in movs:
         tkMessageBox.showwarning("ILLEGAL MOVE", error_expl)
         error_cnt += 1
     # Ambiguity warning
-    if possible_moves > 1and error_cnt == 0:
+    if possible_moves > 1 and error_cnt == 0:
         error_expl = "The notation in movement num."+str(len(history))
         error_expl+= " is ambiguous.\n\n"
         error_expl+= move + "\n\n"
@@ -856,9 +215,10 @@ for move in movs:
         error_expl+= " to be moved is the one in 4i square."
         tkMessageBox.showwarning("AMBIGUOUS NOTATION", error_expl)
         error_cnt += 1
-        
+
+
 # *** From here, the history array is full of Move instances.
-# *** So we restart the board(lamesa) to start drawing with pygame
+# *** So we restart the board to start drawing with pygame
 sprites = SpritesManager()
 max_history = len(history)
 from funciones import (move_forward, previous_highlight, move_back,

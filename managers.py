@@ -61,7 +61,7 @@ class CoordsManager:
         # Pieces arrays
         self.lista = [{},{}]
         self.cnt = []
-        self.r = []
+        self.r = [[],[]]
         for i in xrange(0,26):
             self.lista.append({})
             self.cnt.append([])
@@ -290,7 +290,7 @@ class SpritesManager:
 
     def revert(self, state):
         if state == 1:
-            for i in xrange(0, 26):     
+            for i in xrange(0, 26):
                 if i % 2 == 0:
                     self.imgs[i] =  pygame.transform.scale(self.probes[i/2],
                                                            (70,70))
@@ -302,7 +302,7 @@ class SpritesManager:
             self.imgs[KB] = pygame.transform.scale(self.probes[14], (70,70))
             self.imgs[KB] = pygame.transform.rotozoom(self.imgs[KB], 180, 1)
         else:
-            for i in xrange(0, 13):     
+            for i in xrange(0, 13):
                 self.imgs[(i*2)+1] =  pygame.transform.scale(self.probes[i],
                                                                     (70,70))
                 self.imgs[(i*2)] =  pygame.transform.rotozoom(
@@ -416,6 +416,7 @@ class MatrixManager:
                 if self.matrix[cursory][cursorx] == True:
                     return False
             return True
+        return True
 
 
 '''
@@ -450,10 +451,10 @@ class InputManager:
                 self.sente = sente.match(e).group(2)
             elif gote.match(e):
                 self.gote = gote.match(e).group(2)
-    
+
     def prepare_movs(self):
         reg = re.compile(
-              r'(\+?[P|L|N|S|G|K|R|B](\d[a-i])?[-|x|*]\d[a-i][=|\+]?)')
+              r'(\+?[PLNSGKRB](\d[a-i])?[-x*]\d[a-i][=\+]?)')
         moves = reg.findall(self.raw)
         output = ''
         if moves == []:
@@ -463,7 +464,7 @@ class InputManager:
         for i in xrange(0, len(moves)):
             if output != '':
                 output += '\n'
-            if str(type(moves[i])) == "<type 'tuple'>":    
+            if str(type(moves[i])) == "<type 'tuple'>":
                 output += str(i+1) + ' - ' +moves[i][0]
             else:
                 output += str(i+1) + ' - ' +moves[i]

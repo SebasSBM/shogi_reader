@@ -22,17 +22,102 @@
     This file contains functions defined for shogi_reader
 """
 import pygame
-from globales import *
-from globalvars import *
+from globales import (PN, PB, SPN, SPB, LN, LB, SLN, SLB, NN, NB, SNN,
+                      SNB, SN, SB, SSN, SSB, TN, TB, STN, STB, BN, BB,
+                      SBN, SBB, GN, GB, KN, KB, SCREEN, FONT)
+from globalvars import pos, history, lamesa, matrix, game_data
+
+PROMOTED_KINDS = [SPN,SPB,SLN,SLB,SNN,SNB,SSN,SSB,STN,STB,SBN,SBB]
+
+
+"""
+    Check which pieces can go legitly to the destiny coords
+"""
+def check_legal_destiny(kind, piece, destiny, destiny_h=None):
+    if kind == PN:
+        return destiny[0] == piece[0] and destiny[1] == piece[1]-71
+    if kind == PB:
+        return destiny[0] == piece[0] and destiny[1] == piece[1]+71
+    if kind == LN:
+        return (destiny[0] == piece[0] and destiny[1] < piece[1] and
+                matrix.check(LN, matrix.get_hcoords(piece), destiny_h))
+    if kind == LB:
+        return (destiny[0] == piece[0] and destiny[1] > piece[1] and
+                matrix.check(LB, matrix.get_hcoords(piece), destiny_h))
+    if kind == NN:
+        return (destiny[0] == piece[0]+71 or
+                            destiny[0] == piece[0]-71) and (destiny[1] ==
+                            piece[1]-142)
+    if kind == NB:
+        return (destiny[0] == piece[0]+71 or
+                            destiny[0] == piece[0]-71) and (destiny[1] ==
+                            piece[1]+142)
+    if kind == SN:
+        return (destiny[0] <= piece[0]+71 and destiny[0] >= piece[0]-71 and
+                                          destiny[1] == piece[1]-71) or (
+                                         (destiny[0] == piece[0]+71 or
+                                          destiny[0] == piece[0]-71) and
+                                          destiny[1] == piece[1]+71)
+    if kind == SB:
+        return (destiny[0] <= piece[0]+71 and destiny[0] >= piece[0]-71 and
+                                          destiny[1] == piece[1]+71) or (
+                                         (destiny[0] == piece[0]+71 or
+                                          destiny[0] == piece[0]-71) and
+                                          destiny[1] == piece[1]-71)
+    if kind in [GN, SSN, SPN, SLN, SNN]:
+        return (destiny[0] <= piece[0]+71 and destiny[0] >= piece[0]-71 and
+                                        destiny[1] == piece[1]-71) or (
+                                       (destiny[0] == piece[0]+71 or
+                                        destiny[0] == piece[0]-71) and
+                                        destiny[1] == piece[1]) or (
+                                       (destiny[0] == piece[0]) and
+                                        destiny[1] == piece[1]+71)
+    if kind in [GB, SSB, SPB, SLB, SNB]:
+        return (destiny[0] <= piece[0]+71 and destiny[0] >= piece[0]-71 and
+                                        destiny[1] == piece[1]+71) or (
+                                       (destiny[0] == piece[0]+71 or
+                                        destiny[0] == piece[0]-71) and
+                                        destiny[1] == piece[1]) or (
+                                        destiny[0] == piece[0] and
+                                        destiny[1] == piece[1]-71)
+    if kind in [TN, TB]:
+        return ((destiny[0] == piece[0]) != (destiny[1] == piece[1]) and
+                 matrix.check(kind, matrix.get_hcoords(piece), destiny_h))
+    if kind in [STN, STB]:
+        return ((((destiny[0] == piece[0]) != (destiny[1] == piece[1])) or (
+                   destiny[0] <= piece[0]+71 and destiny[0] >=
+                        piece[0]-71 and destiny[1] <= piece[1]+71 and
+                 destiny[1] >= piece[1]-71)) and (
+                        ((destiny[0] == piece[0]) != (destiny[1] ==
+                          piece[1]) and matrix.check(kind,
+                                        matrix.get_hcoords(piece),
+                                        destiny_h)) or not((destiny[0] ==
+                                piece[0]) != (destiny[1] == piece[1]))))
+    if kind in [BN, BB]:
+        return (abs(destiny[0]-piece[0]) == abs(destiny[1]-piece[1]) and
+                matrix.check(kind, matrix.get_hcoords(piece), destiny_h))
+    if kind in [SBN, SBB]:
+        return (((abs(destiny[0]-piece[0]) == abs(destiny[1]-piece[1])) or (
+                      destiny[0] <= piece[0]+71 and destiny[0] >=
+                  piece[0]-71 and destiny[1] <= piece[1]+71 and
+                   destiny[1] >= piece[1]-71)) and (
+                     ((abs(destiny[0]-piece[0]) == abs(destiny[1]-piece[1])
+                      ) and matrix.check(kind, matrix.get_hcoords(piece),
+                          destiny_h)) or not (abs(destiny[0]-piece[0]) ==
+                          abs(destiny[1]-piece[1]))))
+    if kind in [KN, KB]:
+        return (destiny[0] <= lamesa.lista[kind][1][0]+71 and
+                destiny[0] >= lamesa.lista[kind][1][0]-71 and
+                destiny[1] <= lamesa.lista[kind][1][1]+71 and
+                destiny[1] >= lamesa.lista[kind][1][1]-71)
 
 
 # ******* TABLERO ********
-
 def redraw():
     r = 235
     g = 220
     b = 180
-    bg = int(r), int(g), int(b)
+    bg = r, g, b
 
     SCREEN.fill(bg)
     pygame.draw.rect(SCREEN, (82,64,4), (20, 20, 230, 284))
@@ -94,7 +179,6 @@ def move_forward():
         if history[pos].respawn_kind is not None:
             thekind = history[pos].respawn_kind
             piece = history[pos].respawn_id
-            PROMOTED_KINDS = [SPN,SPB,SLN,SLB,SNN,SNB,SSN,SSB,STN,STB,SBN,SBB]
             finalkind = thekind
             if thekind in PROMOTED_KINDS:
                 finalkind -= 2
@@ -104,7 +188,8 @@ def move_forward():
                 finalkind -=1
 
             del lamesa.lista[thekind][piece]
-            lamesa.r[finalkind] += 1
+            if finalkind not in [KN, KB]:
+                lamesa.r[finalkind] += 1
         pos += 1
         previous_highlight(pos)
 
@@ -155,7 +240,6 @@ def move_back():
             lamesa.lista[thekind][thepiece][1] -= (thecoords[1]
                                                    * lamesa.reverted)
         if history[pos].respawn_kind is not None:
-            PROMOTED_KINDS = [SPN,SPB,SLN,SLB,SNN,SNB,SSN,SSB,STN,STB,SBN,SBB]
             thekind = history[pos].respawn_kind
             piece = history[pos].respawn_id
             thecoords = history[pos].respawn_coords
@@ -171,7 +255,8 @@ def move_back():
                            lamesa.coords_x[thecoords[0]],
                            lamesa.coords_y[thecoords[1]]
             ]
-            lamesa.r[finalkind] -= 1
+            if finalkind not in [KB, KN]:
+                lamesa.r[finalkind] -= 1
         previous_highlight(pos)
 
 def show_names():

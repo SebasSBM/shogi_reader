@@ -2,7 +2,6 @@
 # * coding: utf-8 *
 
 import os, pygame
-from managers import *
 
 # *** Constants ***
 MAINPATH = os.path.dirname(os.path.abspath(__file__)) + '/'

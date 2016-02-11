@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # * coding: utf-8 *
 
-from managers import CoordsManager, InputManager
+from managers import CoordsManager, InputManager, MatrixManager
 
 # *** Global variables ***
 history = []
@@ -21,3 +21,4 @@ partida = open(file_path, 'r')
 rawgame = partida.read()
 game_data = InputManager(rawgame)
 
+matrix = MatrixManager()
